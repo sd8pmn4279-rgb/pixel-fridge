@@ -687,19 +687,161 @@ function renderLog(){
   </div>`).join('');
 }
 
+/* ── LOCAL RECIPE DB ── */
+const RECIPES=[
+  // 炒菜
+  {name:'番茄炒蛋',emoji:'🍳',cat:'炒菜',must:['番茄','鸡蛋'],opt:['葱','糖'],steps:['番茄切块，鸡蛋打散加盐','热锅油炒蛋，凝固盛出','下番茄翻炒出汁','加鸡蛋同炒，加盐糖调味']},
+  {name:'青椒炒肉',emoji:'🌶️',cat:'炒菜',must:['青椒','猪肉'],opt:['蒜','酱油'],steps:['肉切丝腌制，青椒切丝','热锅爆香蒜片','下肉丝炒熟','加青椒大火翻炒，调味出锅']},
+  {name:'土豆丝',emoji:'🥔',cat:'炒菜',must:['土豆'],opt:['醋','葱','辣椒'],steps:['土豆切丝泡水去淀粉','热锅下油爆香葱辣椒','下土豆丝大火炒','加盐醋调味出锅']},
+  {name:'蒜苔炒肉',emoji:'🌿',cat:'炒菜',must:['蒜苔','猪肉'],opt:['酱油','盐'],steps:['蒜苔切段，肉切片腌制','热锅炒肉至变色','下蒜苔翻炒','加调料出锅']},
+  {name:'韭菜炒蛋',emoji:'🥚',cat:'炒菜',must:['韭菜','鸡蛋'],opt:['盐'],steps:['韭菜切段，鸡蛋打散','炒蛋盛出','下韭菜翻炒','加蛋同炒调味']},
+  {name:'洋葱炒肉',emoji:'🧅',cat:'炒菜',must:['洋葱','猪肉'],opt:['酱油','蚝油'],steps:['洋葱切丝，肉切片','热锅炒肉','下洋葱翻炒至透明','加调料出锅']},
+  {name:'西兰花炒虾',emoji:'🥦',cat:'炒菜',must:['西兰花','虾'],opt:['蒜','盐'],steps:['西兰花掰小朵焯水，虾处理干净','爆香蒜末','下虾炒至变色','加西兰花翻炒调味']},
+  {name:'蚝油生菜',emoji:'🥬',cat:'炒菜',must:['生菜','蚝油'],opt:['蒜','盐'],steps:['生菜洗净掰开','蒜末爆香','下生菜大火翻炒','加蚝油调味出锅']},
+  {name:'麻婆豆腐',emoji:'🔴',cat:'炒菜',must:['豆腐','豆瓣酱'],opt:['猪肉末','花椒'],steps:['豆腐切块焯水','炒肉末加豆瓣酱炒香','加水煮沸放豆腐','勾芡撒花椒粉']},
+  {name:'回锅肉',emoji:'🥩',cat:'炒菜',must:['猪肉','青椒','豆瓣酱'],opt:['葱','蒜'],steps:['五花肉煮熟切片','热锅炒肉片出油','下豆瓣酱炒香','加青椒翻炒调味']},
+  {name:'鱼香肉丝',emoji:'🐟',cat:'炒菜',must:['猪肉','胡萝卜'],opt:['木耳','葱','姜','醋','糖'],steps:['肉切丝腌制，胡萝卜切丝','调鱼香汁','炒肉丝盛出','炒配菜加肉丝倒汁翻炒']},
+  {name:'宫保鸡丁',emoji:'🍗',cat:'炒菜',must:['鸡肉','花生'],opt:['辣椒','葱','醋','糖'],steps:['鸡肉切丁腌制','炸香花生','炒鸡丁','加辣椒花生调味汁翻炒']},
+  {name:'芹菜炒肉',emoji:'🌿',cat:'炒菜',must:['芹菜','猪肉'],opt:['盐','酱油'],steps:['芹菜斜切，肉切片','炒肉至变色','下芹菜翻炒','调味出锅']},
+  {name:'茄子炒肉',emoji:'🍆',cat:'炒菜',must:['茄子','猪肉'],opt:['蒜','酱油'],steps:['茄子切块，肉切片','炒肉盛出','下茄子炒软','加肉和调料翻炒']},
+  {name:'黄瓜炒肉',emoji:'🥒',cat:'炒菜',must:['黄瓜','猪肉'],opt:['蒜','盐'],steps:['黄瓜拍裂切块，肉切片','炒肉片','下黄瓜翻炒','调味出锅']},
+  {name:'干煸四季豆',emoji:'🫘',cat:'炒菜',must:['四季豆'],opt:['猪肉末','蒜','辣椒'],steps:['四季豆掰段，干锅炒至起皱','另起锅炒肉末和蒜','加四季豆翻炒','调味出锅']},
+  {name:'包菜炒肉',emoji:'🥬',cat:'炒菜',must:['包菜','猪肉'],opt:['葱','酱油'],steps:['包菜切块，肉切片','炒肉片','下包菜大火翻炒','调味出锅']},
+  {name:'苦瓜炒蛋',emoji:'🥚',cat:'炒菜',must:['苦瓜','鸡蛋'],opt:['盐'],steps:['苦瓜切片焯水，鸡蛋打散','炒蛋盛出','下苦瓜翻炒','加蛋同炒调味']},
+  {name:'杏鲍菇炒肉',emoji:'🍄',cat:'炒菜',must:['杏鲍菇','猪肉'],opt:['蒜','蚝油'],steps:['杏鲍菇切片，肉切片','炒肉片','下杏鲍菇翻炒','加蚝油调味']},
+  {name:'豆腐炒鸡蛋',emoji:'🥚',cat:'炒菜',must:['豆腐','鸡蛋'],opt:['葱','盐'],steps:['豆腐切块，鸡蛋打散','炒蛋盛出','下豆腐煎两面金黄','加蛋和葱调味']},
+  {name:'尖椒炒鸡蛋',emoji:'🌶️',cat:'炒菜',must:['辣椒','鸡蛋'],opt:['盐'],steps:['辣椒切丝，鸡蛋打散','炒蛋盛出','下辣椒翻炒','加蛋同炒调味']},
+  {name:'白菜炒肉',emoji:'🥬',cat:'炒菜',must:['白菜','猪肉'],opt:['蒜','酱油'],steps:['白菜切片，肉切片','炒肉片','下白菜翻炒','调味出锅']},
+  {name:'泡椒炒牛肉',emoji:'🐄',cat:'炒菜',must:['牛肉','泡椒'],opt:['姜','蒜'],steps:['牛肉切片腌制','热锅爆香姜蒜','下牛肉大火翻炒','加泡椒调味出锅']},
+  {name:'豆角炒肉',emoji:'🫘',cat:'炒菜',must:['豆角','猪肉'],opt:['蒜','盐'],steps:['豆角切段焯水，肉切片','炒肉片','下豆角翻炒','调味出锅']},
+  {name:'青椒豆腐',emoji:'🌶️',cat:'炒菜',must:['青椒','豆腐'],opt:['蒜','盐'],steps:['豆腐切块煎黄，青椒切片','爆香蒜末','下青椒翻炒','加豆腐调味']},
+  {name:'腊肉炒蒜苗',emoji:'🥓',cat:'炒菜',must:['腊肉','蒜苗'],opt:['辣椒'],steps:['腊肉切片，蒜苗切段','干锅炒腊肉出油','下蒜苗翻炒','调味出锅']},
+  {name:'番茄炒花椰菜',emoji:'🥦',cat:'炒菜',must:['番茄','西兰花'],opt:['盐','糖'],steps:['西兰花焯水，番茄切块','炒番茄出汁','下西兰花翻炒','调味出锅']},
+  {name:'洋葱炒鸡蛋',emoji:'🧅',cat:'炒菜',must:['洋葱','鸡蛋'],opt:['盐'],steps:['洋葱切丝，鸡蛋打散','炒蛋盛出','下洋葱炒软','加蛋调味']},
+  {name:'韭黄炒肉丝',emoji:'🌿',cat:'炒菜',must:['韭黄','猪肉'],opt:['盐'],steps:['韭黄切段，肉切丝','炒肉丝','下韭黄翻炒','调味出锅']},
+  {name:'口蘑炒肉',emoji:'🍄',cat:'炒菜',must:['口蘑','猪肉'],opt:['蒜','盐'],steps:['口蘑切片，肉切片','炒肉片','下口蘑翻炒','调味出锅']},
+  // 汤/炖
+  {name:'番茄蛋汤',emoji:'🍲',cat:'汤',must:['番茄','鸡蛋'],opt:['葱','盐'],steps:['番茄切块鸡蛋打散','热锅炒番茄出汁','加水煮沸','打入蛋花调味']},
+  {name:'白菜豆腐汤',emoji:'🍲',cat:'汤',must:['白菜','豆腐'],opt:['盐'],steps:['白菜切段豆腐切块','加水煮沸','下白菜豆腐','煮至软烂调味']},
+  {name:'紫菜蛋花汤',emoji:'🍲',cat:'汤',must:['紫菜','鸡蛋'],opt:['葱','盐'],steps:['紫菜泡发，鸡蛋打散','水烧开下紫菜','打入蛋花','调味撒葱花']},
+  {name:'排骨土豆汤',emoji:'🦴',cat:'汤',must:['排骨','土豆'],opt:['姜','盐'],steps:['排骨焯水，土豆切块','加姜加水大火煮沸','转小火炖40分钟','加土豆再炖20分钟调味']},
+  {name:'冬瓜排骨汤',emoji:'🍲',cat:'汤',must:['排骨','冬瓜'],opt:['姜','盐'],steps:['排骨焯水，冬瓜切块','排骨加姜煮沸转小火炖30分钟','加冬瓜煮软','调味出锅']},
+  {name:'萝卜排骨汤',emoji:'🦴',cat:'汤',must:['排骨','萝卜'],opt:['姜','盐'],steps:['排骨焯水，萝卜切块','加姜煮开转小火炖40分钟','加萝卜再炖20分钟','调味']},
+  {name:'玉米排骨汤',emoji:'🌽',cat:'汤',must:['玉米','排骨'],opt:['姜','盐'],steps:['排骨焯水，玉米切段','加姜大火煮开','转小火炖1小时','调味出锅']},
+  {name:'番茄牛腩',emoji:'🍅',cat:'汤',must:['牛肉','番茄'],opt:['土豆','姜','酱油'],steps:['牛腩焯水切块，番茄切块','炒番茄出汁','加牛腩和水','小火炖1.5小时调味']},
+  {name:'土豆炖牛肉',emoji:'🥔',cat:'汤',must:['牛肉','土豆'],opt:['洋葱','酱油'],steps:['牛肉焯水切块','炒洋葱加牛肉翻炒','加酱油和水炖1小时','加土豆再炖30分钟']},
+  {name:'鸡蛋羹',emoji:'🥚',cat:'汤',must:['鸡蛋'],opt:['酱油','葱'],steps:['鸡蛋打散加盐加温水','过滤去泡沫','上锅中火蒸12分钟','淋酱油撒葱花']},
+  {name:'红烧排骨',emoji:'🦴',cat:'炖',must:['排骨','酱油'],opt:['糖','姜','料酒'],steps:['排骨焯水','热锅炒糖色，下排骨上色','加酱油料酒水','小火炖40分钟收汁']},
+  {name:'红烧肉',emoji:'🥩',cat:'炖',must:['猪肉','酱油'],opt:['糖','姜','料酒'],steps:['五花肉切块焯水','炒糖色下肉块','加酱油料酒水','小火炖1小时收汁']},
+  {name:'土豆炖鸡',emoji:'🍗',cat:'炖',must:['鸡肉','土豆'],opt:['姜','酱油'],steps:['鸡块焯水，土豆切块','炒鸡块上色','加酱油水炖30分钟','加土豆再炖20分钟']},
+  {name:'萝卜炖羊肉',emoji:'🐑',cat:'炖',must:['羊肉','萝卜'],opt:['姜','盐'],steps:['羊肉焯水切块，萝卜切块','加姜大火炖开','转小火炖1小时','加萝卜再炖20分钟调味']},
+  {name:'豆腐鱼汤',emoji:'🐟',cat:'汤',must:['鱼','豆腐'],opt:['姜','葱'],steps:['鱼两面煎黄，豆腐切块','加姜加热水','大火煮至汤白','下豆腐煮10分钟调味']},
+  // 蒸菜
+  {name:'清蒸鱼',emoji:'🐟',cat:'蒸',must:['鱼'],opt:['葱','姜','酱油'],steps:['鱼处理干净两面划刀','铺姜丝上锅蒸8分钟','倒掉蒸出的水','淋酱油浇热油撒葱丝']},
+  {name:'蒸蛋',emoji:'🥚',cat:'蒸',must:['鸡蛋'],opt:['葱','酱油'],steps:['鸡蛋打散加1.5倍温水','加盐过滤','上锅中小火蒸12分钟','淋酱油撒葱花']},
+  {name:'清蒸虾',emoji:'🦐',cat:'蒸',must:['虾'],opt:['姜','酱油'],steps:['虾处理干净铺姜片','上锅大火蒸5分钟','调蘸料：酱油姜末','蘸食']},
+  {name:'蒸茄子',emoji:'🍆',cat:'蒸',must:['茄子'],opt:['蒜','酱油'],steps:['茄子蒸软撕成条','蒜末加酱油醋辣椒油调汁','浇在茄子上','拌匀即可']},
+  {name:'粉蒸排骨',emoji:'🦴',cat:'蒸',must:['排骨'],opt:['米粉','酱油','姜'],steps:['排骨腌制半小时','裹上炒香的米粉','上锅大火蒸45分钟','撒葱花出锅']},
+  {name:'蒸南瓜',emoji:'🎃',cat:'蒸',must:['南瓜'],opt:['糖'],steps:['南瓜去皮切块','摆盘上锅蒸15分钟','可撒糖增甜','直接食用']},
+  // 凉拌
+  {name:'凉拌黄瓜',emoji:'🥒',cat:'凉拌',must:['黄瓜'],opt:['蒜','醋','辣椒油'],steps:['黄瓜拍裂切段','蒜末加盐醋糖辣椒油调汁','倒在黄瓜上','腌10分钟拌匀']},
+  {name:'凉拌土豆丝',emoji:'🥔',cat:'凉拌',must:['土豆'],opt:['醋','辣椒','葱'],steps:['土豆切丝焯水过凉','调汁：醋盐糖辣椒油','浇在土豆丝上','拌匀撒葱花']},
+  {name:'凉拌豆腐',emoji:'🫘',cat:'凉拌',must:['豆腐'],opt:['葱','酱油','香油'],steps:['豆腐切块摆盘','葱末蒜末放豆腐上','淋酱油香油','浇热油激香']},
+  {name:'凉拌木耳',emoji:'🍄',cat:'凉拌',must:['木耳'],opt:['蒜','醋','辣椒'],steps:['木耳泡发焯水过凉','蒜末加醋盐糖辣椒油调汁','浇在木耳上','拌匀即可']},
+  {name:'拍黄瓜',emoji:'🥒',cat:'凉拌',must:['黄瓜','蒜'],opt:['辣椒油','醋'],steps:['黄瓜用刀拍碎切段','蒜末加盐醋糖辣椒油调汁','倒在黄瓜上拌匀','腌5分钟']},
+  {name:'蒜泥白肉',emoji:'🥩',cat:'凉拌',must:['猪肉','蒜'],opt:['酱油','辣椒油','黄瓜'],steps:['猪肉煮熟切薄片','黄瓜切丝垫底','铺上肉片','浇蒜泥酱油辣椒油调汁']},
+  {name:'凉拌菠菜',emoji:'🌿',cat:'凉拌',must:['菠菜'],opt:['蒜','芝麻','酱油'],steps:['菠菜焯水过凉挤干','蒜末加酱油醋盐调汁','浇在菠菜上','撒芝麻拌匀']},
+  {name:'皮蛋豆腐',emoji:'🥚',cat:'凉拌',must:['皮蛋','豆腐'],opt:['葱','酱油','香油'],steps:['豆腐切块摆盘','皮蛋切块摆在豆腐上','撒葱末','淋酱油香油']},
+  // 主食
+  {name:'蛋炒饭',emoji:'🍳',cat:'主食',must:['鸡蛋'],opt:['米饭','葱','酱油'],steps:['米饭打散，鸡蛋打散','热锅下蛋液翻炒','加米饭大火翻炒','加酱油盐葱花出锅']},
+  {name:'番茄鸡蛋面',emoji:'🍜',cat:'主食',must:['番茄','鸡蛋','面条'],opt:['葱','盐'],steps:['番茄切块炒出汁','加水煮沸','下面条煮熟','打入鸡蛋调味出锅']},
+  {name:'炸酱面',emoji:'🍜',cat:'主食',must:['面条','猪肉'],opt:['黄瓜','黄豆酱','葱'],steps:['肉末炒香加黄豆酱炒成炸酱','面条煮熟','黄瓜切丝摆盘','盖上炸酱拌匀']},
+  {name:'葱油拌面',emoji:'🍜',cat:'主食',must:['面条','葱'],opt:['酱油','糖'],steps:['葱切段用油小火炸香','酱油糖调成料汁','面条煮熟','浇葱油料汁拌匀']},
+  {name:'牛肉面',emoji:'🍜',cat:'主食',must:['牛肉','面条'],opt:['番茄','姜','酱油'],steps:['牛肉焯水切块炖软','下面条煮熟','捞出放碗里','浇牛肉汤加牛肉']},
+  {name:'虾仁炒饭',emoji:'🦐',cat:'主食',must:['虾','鸡蛋'],opt:['米饭','葱','盐'],steps:['虾仁处理干净，鸡蛋打散','炒蛋加米饭翻炒','下虾仁翻炒至熟','调味撒葱花']},
+  {name:'韭菜鸡蛋饺子',emoji:'🥟',cat:'主食',must:['韭菜','鸡蛋'],opt:['面粉','盐'],steps:['韭菜炒蛋做馅调味','面粉和成面团','擀皮包入馅料','煮至浮起再煮3分钟']},
+  {name:'葱花饼',emoji:'🫓',cat:'主食',must:['葱'],opt:['面粉','盐','油'],steps:['面粉和面醒发','擀成薄饼撒葱花盐','卷起再擀平','锅中小火烙至金黄']},
+  {name:'土豆饼',emoji:'🥔',cat:'主食',must:['土豆','鸡蛋'],opt:['面粉','葱','盐'],steps:['土豆擦丝，加蛋面粉葱花盐拌匀','平底锅热油','倒入摊平','两面煎至金黄']},
+  {name:'玉米饼',emoji:'🌽',cat:'主食',must:['玉米'],opt:['面粉','鸡蛋','盐'],steps:['玉米粒加面粉蛋盐拌匀','平底锅热油','舀入煎至定形','翻面煎黄']},
+  {name:'鸡蛋饼',emoji:'🥚',cat:'主食',must:['鸡蛋'],opt:['面粉','葱','盐'],steps:['鸡蛋加面粉水盐调成面糊','平底锅热油','倒入面糊摊匀','两面煎熟撒葱花']},
+  {name:'火腿鸡蛋炒饭',emoji:'🍳',cat:'主食',must:['鸡蛋','火腿'],opt:['米饭','葱'],steps:['火腿切丁，鸡蛋打散','炒蛋加米饭翻炒','下火腿丁翻炒','调味撒葱花']},
+  // 蛋类
+  {name:'荷包蛋',emoji:'🥚',cat:'蛋',must:['鸡蛋'],opt:['盐','葱'],steps:['锅内水烧至微沸','打入鸡蛋','小火煮3分钟','捞出调味']},
+  {name:'溏心蛋',emoji:'🥚',cat:'蛋',must:['鸡蛋','酱油'],opt:['糖','料酒'],steps:['鸡蛋煮7分钟剥壳','酱油糖料酒加水调卤汁','鸡蛋放入腌制2小时','切开食用']},
+  {name:'葱花炒蛋',emoji:'🥚',cat:'蛋',must:['鸡蛋','葱'],opt:['盐'],steps:['鸡蛋打散加盐，葱切葱花','热锅油爆香葱花','倒入蛋液翻炒','半凝固出锅']},
+  {name:'菠菜炒蛋',emoji:'🌿',cat:'蛋',must:['菠菜','鸡蛋'],opt:['蒜','盐'],steps:['菠菜洗净，鸡蛋打散','炒蛋盛出','爆香蒜末下菠菜','加蛋调味出锅']},
+  {name:'番茄蒸蛋',emoji:'🍅',cat:'蛋',must:['番茄','鸡蛋'],opt:['盐','糖'],steps:['番茄去皮切碎','鸡蛋打散加番茄碎调味','上锅蒸12分钟','出锅淋香油']},
+  {name:'培根炒蛋',emoji:'🥓',cat:'蛋',must:['培根','鸡蛋'],opt:['盐','葱'],steps:['培根切片煸香','打入鸡蛋翻炒','加盐调味','撒葱花出锅']},
+  // 其他
+  {name:'酸菜鱼',emoji:'🐟',cat:'炖',must:['鱼','酸菜'],opt:['辣椒','姜','蛋清'],steps:['鱼切片腌制，酸菜切段','炒酸菜加水煮沸','下鱼片滑熟','浇热油加辣椒调味']},
+  {name:'水煮肉片',emoji:'🥩',cat:'炖',must:['猪肉','豆瓣酱'],opt:['白菜','辣椒','蒜'],steps:['肉片腌制，白菜垫底','炒豆瓣酱加水煮沸','下肉片煮熟','浇热油辣椒花椒油']},
+  {name:'毛血旺',emoji:'🔴',cat:'炖',must:['豆腐','豆瓣酱'],opt:['猪肉','辣椒'],steps:['豆腐切块各食材备好','炒豆瓣酱加水煮开','下各种食材煮熟','浇热油辣椒油']},
+  {name:'清炒豆芽',emoji:'🌱',cat:'炒菜',must:['豆芽'],opt:['葱','醋','盐'],steps:['豆芽洗净沥干','热锅大火爆香葱','下豆芽大火翻炒','加盐醋调味出锅']},
+  {name:'蒜蓉炒虾',emoji:'🦐',cat:'炒菜',must:['虾','蒜'],opt:['葱','盐'],steps:['虾处理干净，蒜剁碎','热锅爆香蒜末','下虾大火翻炒','加盐葱花出锅']},
+  {name:'辣炒花蛤',emoji:'🐚',cat:'炒菜',must:['花蛤'],opt:['辣椒','蒜','姜','豆豉'],steps:['花蛤吐沙焯水','爆香姜蒜辣椒豆豉','下花蛤大火翻炒','调味出锅']},
+  {name:'红烧豆腐',emoji:'🫘',cat:'炖',must:['豆腐','酱油'],opt:['葱','糖'],steps:['豆腐切块煎至金黄','加酱油糖水','中火焖5分钟','收汁撒葱花']},
+  {name:'糖醋排骨',emoji:'🦴',cat:'炖',must:['排骨','醋'],opt:['糖','酱油'],steps:['排骨焯水','炒糖色下排骨','加醋酱油水炖30分钟','大火收汁']},
+  {name:'糖醋鱼',emoji:'🐟',cat:'炖',must:['鱼','醋'],opt:['糖','酱油','番茄酱'],steps:['鱼处理干净打花刀','裹淀粉炸至金黄','调糖醋汁煮开','浇在鱼上']},
+  {name:'冬瓜虾皮汤',emoji:'🍲',cat:'汤',must:['冬瓜'],opt:['虾皮','盐','葱'],steps:['冬瓜去皮切块','水煮沸下冬瓜','煮至透明加虾皮','调味撒葱花']},
+];
+
+// Ingredient keyword matching
+function hasIngredient(fridgeItems, needed){
+  return fridgeItems.some(item=>{
+    const n=item.name.replace(/\d+[克g个只斤两袋瓶包]/g,'').trim();
+    return n.includes(needed)||needed.includes(n)||
+      (needed==='猪肉'&&(n.includes('五花')||n.includes('里脊')||n.includes('猪')||n.includes('肉末')))||
+      (needed==='鸡肉'&&(n.includes('鸡腿')||n.includes('鸡胸')||n.includes('鸡翅')))||
+      (needed==='牛肉'&&(n.includes('牛腩')||n.includes('牛腱')))||
+      (needed==='鱼'&&(n.includes('鲫鱼')||n.includes('草鱼')||n.includes('鲤鱼')||n.includes('黑鱼')))||
+      (needed==='虾'&&(n.includes('虾仁')||n.includes('基围虾')||n.includes('明虾')))||
+      (needed==='番茄'&&n.includes('西红柿'))||
+      (needed==='西红柿'&&n.includes('番茄'));
+  });
+}
+
+function matchLocalRecipes(items){
+  return RECIPES.map(r=>{
+    const matched=r.must.filter(m=>hasIngredient(items,m)).length;
+    const total=r.must.length;
+    const score=total>0?matched/total:0;
+    const missing=r.must.filter(m=>!hasIngredient(items,m));
+    return{...r,score,missing,matched};
+  })
+  .filter(r=>r.score>=0.7)
+  .sort((a,b)=>b.score-a.score||a.missing.length-b.missing.length)
+  .slice(0,6);
+}
+
 /* ── RECIPE ── */
-async function suggest(){
+function suggest(){
   const items=load();if(!items.length){alert('食材是空的');return;}
-  const btn=document.getElementById('sug-btn');btn.disabled=true;btn.innerHTML='<span class="ld">思考中</span>';document.getElementById('recipes').innerHTML='';
-  try{
-    const res=await fetch('https://miuxbmxwqcpjvpfydjzq.supabase.co/functions/v1/fridge-recipe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ingredients:items.map(i=>({name:i.name,quantity:i.qty||'适量',daysLeft:daysLeft(i)}))})});
-    const data=await res.json();if(data.error)throw new Error(data.error);renderRecipes(data.recipes||[]);
-  }catch(e){document.getElementById('recipes').innerHTML=`<div class="empty">获取失败：${e.message}</div>`;}
-  btn.disabled=false;btn.innerHTML='🍳 重新推荐';
+  const btn=document.getElementById('sug-btn');
+  btn.disabled=true;btn.innerHTML='匹配中...';
+  const results=matchLocalRecipes(items);
+  if(!results.length){
+    document.getElementById('recipes').innerHTML='<div class="empty">当前食材不足以匹配菜谱<br>试着多加一些食材吧</div>';
+  } else {
+    renderRecipes(results);
+  }
+  btn.disabled=false;btn.innerHTML='🍳 重新匹配';
 }
 function renderRecipes(rs){
   if(!rs.length){document.getElementById('recipes').innerHTML='<div class="empty">暂无推荐</div>';return;}
-  document.getElementById('recipes').innerHTML=rs.map((r,i)=>`<div class="recipe-card" onclick="toggleSteps(${i})"><div class="recipe-name">${r.emoji||'🍽'} ${r.name}</div><div class="recipe-why">${r.reason||''}</div><div class="rtags">${(r.ingredients_have||[]).map(t=>`<span class="rtag have">✓${t}</span>`).join('')}${(r.ingredients_need||[]).map(t=>`<span class="rtag need">+${t}</span>`).join('')}</div><div class="rsteps" id="rs-${i}">${(r.steps||[]).map((s,j)=>`<div class="rstep" data-n="${j+1}">${s}</div>`).join('')}</div></div>`).join('');
+  document.getElementById('recipes').innerHTML=rs.map((r,i)=>{
+    const haveTagsHtml=(r.ingredients_have||r.must.filter(m=>!r.missing.includes(m))).map(t=>`<span class="rtag have">✓${t}</span>`).join('');
+    const needTagsHtml=(r.ingredients_need||r.missing).map(t=>`<span class="rtag need">+${t}</span>`).join('');
+    const pct=Math.round((r.score||0)*100);
+    return `<div class="recipe-card">
+      <div class="recipe-name">${r.emoji||'🍽'} ${r.name} <span style="font-size:8px;color:var(--muted);float:right">${pct}%匹配</span></div>
+      <div style="font-size:8px;color:var(--muted);margin-bottom:6px">${r.cat||''}</div>
+      <div class="rtags">${haveTagsHtml}${needTagsHtml}</div>
+      <div style="border-top:1px dashed var(--light);margin-top:8px;padding-top:8px">
+        <div style="font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:6px">做法</div>
+        ${(r.steps||[]).map((s,j)=>`<div class="rstep" data-n="${j+1}">${s}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
 }
 function toggleSteps(i){const e=document.getElementById(`rs-${i}`);if(e)e.classList.toggle('show');}
 
