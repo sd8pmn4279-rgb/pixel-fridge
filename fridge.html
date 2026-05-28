@@ -401,7 +401,10 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
     <div class="del-modal-btns">
       <div class="del-modal-btn" onclick="confirmDel('eaten')">✓ 吃完了</div>
       <div class="del-modal-btn" onclick="confirmDel('tossed')">🗑 扔掉了</div>
-      <div class="del-modal-btn" onclick="cancelDel()">取消</div>
+    </div>
+    <div class="del-modal-btns" style="margin-top:6px">
+      <div class="del-modal-btn" onclick="confirmDel('mistake')" style="color:var(--muted);font-size:9px">填错了，直接删</div>
+      <div class="del-modal-btn" onclick="cancelDel()" style="color:var(--muted);font-size:9px">取消</div>
     </div>
   </div>
 </div>
@@ -659,7 +662,7 @@ function confirmDel(reason){
   if(!_pendingDelId)return;
   const items=load();
   const item=items.find(i=>i.id===_pendingDelId);
-  if(item){
+  if(item && reason!=='mistake'){
     const log=loadLog();
     log.push({name:item.name,reason,date:new Date().toISOString().split('T')[0]});
     saveLog(log);
