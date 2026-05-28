@@ -4,7 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="冰箱">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="theme-color" content="#3a8a6a">
+<meta name="apple-mobile-web-app-title" content="像素冰箱">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#3a8a6a">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <title>冰箱 · Pixel Fridge</title>
 <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 <style>
@@ -82,6 +91,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .food-tip{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:6px;color:var(--text);white-space:nowrap;background:rgba(255,255,255,0.92);padding:1px 3px;border:1px solid var(--light);opacity:0;transition:opacity .15s;pointer-events:none;z-index:20;}
 .food-item:hover .food-tip{opacity:1;}
 .food-label{font-size:7px;text-align:center;color:rgba(0,0,0,0.7);line-height:1;letter-spacing:0;white-space:nowrap;position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.75);padding:0 2px;pointer-events:none;}
+#label-popup{position:absolute;background:rgba(30,50,40,0.92);color:#f0faf5;font-size:10px;padding:3px 8px;white-space:nowrap;pointer-events:none;z-index:999;display:none;font-family:'DotGothic16',monospace;letter-spacing:1px;}
 
 /* ── STATUS ── */
 .status-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
@@ -109,6 +119,8 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .fresh-bg{height:4px;background:var(--light);}
 .fresh-fill{height:100%;transition:width .3s;}
 .fresh-lbl{font-size:8px;font-weight:700;margin-top:2px;}
+.qty-tag{font-size:10px;color:var(--accent);border-bottom:1px dashed var(--accent);cursor:pointer;padding:0 2px;}
+.qty-tag:hover{background:var(--light);}
 .del-btn{padding:2px 6px;border:1px solid var(--light);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:9px;}
 .del-btn:hover{border-color:var(--expire);color:var(--expire);}
 
@@ -186,6 +198,15 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .stat-count{font-size:8px;color:var(--muted);width:20px;text-align:right;flex-shrink:0;}
 
 /* delete modal */
+.edit-modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:flex;align-items:center;justify-content:center;}
+.edit-modal-box{background:var(--card);border:2px solid var(--border);padding:20px;box-shadow:6px 6px 0 var(--shadow);width:260px;}
+.edit-modal-title{font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.edit-modal-name{font-size:14px;color:var(--accent);margin-bottom:12px;}
+.edit-modal-input{width:100%;padding:8px;border:2px solid var(--border);background:var(--cream);font-family:inherit;font-size:13px;color:var(--text);outline:none;margin-bottom:12px;}
+.edit-modal-input:focus{border-color:var(--accent);}
+.edit-modal-btns{display:flex;gap:8px;}
+.edit-modal-btn{flex:1;padding:8px;border:2px solid var(--border);background:var(--cream);font-family:inherit;font-size:10px;cursor:pointer;text-align:center;}
+.edit-modal-btn.confirm{background:var(--accent);color:var(--cream);border-color:var(--accent);}
 .del-modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:flex;align-items:center;justify-content:center;}
 .del-modal-box{background:var(--card);border:2px solid var(--border);padding:20px;box-shadow:6px 6px 0 var(--shadow);width:240px;}
 .del-modal-title{font-size:12px;color:var(--text);margin-bottom:6px;}
@@ -391,7 +412,21 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 <!-- receipt saves directly via download -->
 
+<div id="label-popup"></div>
 <div class="footer">PIXEL FRIDGE · 像素冰箱</div>
+
+<!-- Edit qty modal -->
+<div class="edit-modal" id="edit-modal" style="display:none">
+  <div class="edit-modal-box">
+    <div class="edit-modal-title">修改数量</div>
+    <div class="edit-modal-name" id="edit-modal-name"></div>
+    <input class="edit-modal-input" id="edit-modal-input" placeholder="5个、500g...">
+    <div class="edit-modal-btns">
+      <div class="edit-modal-btn confirm" onclick="confirmEditQty()">确认</div>
+      <div class="edit-modal-btn" onclick="document.getElementById('edit-modal').style.display='none'">取消</div>
+    </div>
+  </div>
+</div>
 
 <!-- Delete reason modal -->
 <div class="del-modal" id="del-modal" style="display:none">
@@ -537,15 +572,15 @@ function renderShelves(){
   fridge.forEach((it,i)=>sh[i%3].push(it));
   ['shelf1','shelf2','shelf3'].forEach((id,i)=>{
     const el=document.getElementById(id);if(!el)return;
-    el.innerHTML=sh[i].map(it=>`<div class="food-item ${freshCls(it)}">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div><div class="food-tip">${it.name}</div></div>`).join('')||'<span style="font-size:6px;color:#9ab4ac">空</span>';
+    el.innerHTML=sh[i].map(it=>`<div class="food-item ${freshCls(it)}" data-full="${it.name}${it.qty?' · '+it.qty:''}" onclick="toggleLabel(this)">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div></div>`).join('')||'<span style="font-size:6px;color:#9ab4ac">空</span>';
   });
   const fz=document.getElementById('shelf-freeze');
-  if(fz) fz.innerHTML=freeze.map(it=>`<div class="food-item ${freshCls(it)}">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div><div class="food-tip">${it.name}</div></div>`).join('')||'<span style="font-size:6px;color:#9ab4ac">空</span>';
+  if(fz) fz.innerHTML=freeze.map(it=>`<div class="food-item ${freshCls(it)}" data-full="${it.name}${it.qty?' · '+it.qty:''}" onclick="toggleLabel(this)">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div></div>`).join('')||'<span style="font-size:6px;color:#9ab4ac">空</span>';
   const ps=[[],[]];
   pantry.forEach((it,i)=>ps[i%2].push(it));
   ['pantry-shelf1','pantry-shelf2'].forEach((id,i)=>{
     const el=document.getElementById(id);if(!el)return;
-    el.innerHTML=ps[i].map(it=>`<div class="food-item ${freshCls(it)}">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div><div class="food-tip">${it.name}</div></div>`).join('')||'<span style="font-size:6px;color:#c0a080">空</span>';
+    el.innerHTML=ps[i].map(it=>`<div class="food-item ${freshCls(it)}" data-full="${it.name}${it.qty?' · '+it.qty:''}" onclick="toggleLabel(this)">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div></div>`).join('')||'<span style="font-size:6px;color:#c0a080">空</span>';
   });
 }
 
@@ -565,12 +600,33 @@ function renderList(){
   const row=it=>{
     const d=daysLeft(it),cls=freshCls(it),col=freshCol(cls),pct=Math.max(0,Math.min(100,(d/it.expiryDays)*100));
     const lbl=d<=0?'已过期':d===1?'明天到期':`还有${d}天`;
-    return `<div class="item-row"><div class="item-px">${getPixel(it.cat,it.name)}</div><div class="item-info"><div class="item-name">${it.name}${it.qty?' · '+it.qty:''}</div><div class="item-meta">${it.cat} · ${it.date}</div></div><div class="fresh-wrap"><div class="fresh-bg"><div class="fresh-fill" style="width:${pct}%;background:${col}"></div></div><div class="fresh-lbl" style="color:${col}">${lbl}</div></div><button class="del-btn" onclick="delItem('${it.id}')">✕</button></div>`;
+    return `<div class="item-row"><div class="item-px">${getPixel(it.cat,it.name)}</div><div class="item-info"><div class="item-name">${it.name} <span class="qty-tag" onclick="editQty('${it.id}')">${it.qty||'点击填数量'}</span></div><div class="item-meta">${it.cat} · ${it.date}</div></div><div class="fresh-wrap"><div class="fresh-bg"><div class="fresh-fill" style="width:${pct}%;background:${col}"></div></div><div class="fresh-lbl" style="color:${col}">${lbl}</div></div><button class="del-btn" onclick="delItem('${it.id}')">✕</button></div>`;
   };
   document.getElementById('list-fridge').innerHTML=fr.length?fr.map(row).join(''):'<div class="empty">冷藏室是空的</div>';
   document.getElementById('list-freeze').innerHTML=fz.length?fz.map(row).join(''):'<div class="empty">冷冻室是空的</div>';
   document.getElementById('list-pantry').innerHTML=pt.length?pt.map(row).join(''):'<div class="empty">调料架是空的</div>';
   renderLog();
+}
+
+/* ── EDIT QTY ── */
+let _editId=null;
+function editQty(id){
+  const item=load().find(i=>i.id===id);
+  if(!item)return;
+  _editId=id;
+  document.getElementById('edit-modal-name').textContent=item.name;
+  document.getElementById('edit-modal-input').value=item.qty||'';
+  document.getElementById('edit-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('edit-modal-input').focus(),100);
+}
+function confirmEditQty(){
+  if(!_editId)return;
+  const items=load();
+  const item=items.find(i=>i.id===_editId);
+  if(item){item.qty=document.getElementById('edit-modal-input').value.trim();}
+  save(items);_editId=null;
+  document.getElementById('edit-modal').style.display='none';
+  renderList();renderShelves();
 }
 
 /* ── ADD / DEL ── */
@@ -871,6 +927,32 @@ function showTab(tab){
   if(tab==='diary')renderCookLog();
 }
 
+/* ── LABEL TOGGLE ── */
+function toggleLabel(el){
+  const popup = document.getElementById('label-popup');
+  // if already showing for this element, hide it
+  if(popup._src === el && popup.style.display === 'block'){
+    popup.style.display = 'none';
+    popup._src = null;
+    clearTimeout(popup._t);
+    return;
+  }
+  // position popup above the element
+  const rect = el.getBoundingClientRect();
+  popup.textContent = el.dataset.full;
+  popup.style.display = 'block';
+  popup._src = el;
+  // center above item
+  const pw = Math.max(popup.scrollWidth + 12, 60);
+  let left = rect.left + rect.width/2 - pw/2;
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  popup.style.left = left + 'px';
+  popup.style.top = (rect.top - 30 + window.scrollY) + 'px';
+  // auto hide
+  clearTimeout(popup._t);
+  popup._t = setTimeout(()=>{ popup.style.display='none'; popup._src=null; }, 2000);
+}
+
 /* ── SCENE SWITCH ── */
 function switchScene(s){
   document.getElementById('scene-fridge').style.display = s==='fridge'?'block':'none';
@@ -1040,10 +1122,13 @@ async function drawReceipt(log){
     await new Promise(res=>{
       const img=new Image();
       img.onload=()=>{
-        // draw with rounded feel - just clip
-        c.save();
-        c.drawImage(img,PAD,y,W-PAD*2,photoH);
-        c.restore();
+        // maintain aspect ratio (cover crop)
+        const tW=W-PAD*2, tH=photoH;
+        const iAsp=img.width/img.height, tAsp=tW/tH;
+        let sx,sy,sw,sh;
+        if(iAsp>tAsp){sw=img.height*tAsp;sh=img.height;sx=(img.width-sw)/2;sy=0;}
+        else{sw=img.width;sh=img.width/tAsp;sx=0;sy=(img.height-sh)/2;}
+        c.drawImage(img,sx,sy,sw,sh,PAD,y,tW,tH);
         res();
       };
       img.onerror=res;
@@ -1143,6 +1228,21 @@ function wrapText(text,maxW,fontSize){
 document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
 buildSwatches();renderList();renderShelves();renderTemplates();
 document.getElementById('d-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('edit-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmEditQty();});
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
