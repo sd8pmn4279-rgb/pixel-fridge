@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="冰箱">
+<title>冰箱 · Pixel Fridge</title>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e8f4f0;--card:#f4fbf8;--border:#5a8a7a;--accent:#3a8a6a;
+  --cream:#f0faf5;--text:#2a4a3a;--muted:#6a8a7a;--light:#c0ddd5;
+  --shadow:#8ab4a8;--fresh:#3a9a5a;--warn:#d4901c;--expire:#b04040;
+  --fd:#c8e8e0;--fd-dark:#3a6a5a;--fd-bg:#d8f0e8;
+  --interior:#d0ece8;--freeze-int:#c8e4f4;--shelf:#9abcb4;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DotGothic16',monospace;font-size:12px;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle,var(--light) 1px,transparent 1px);background-size:14px 14px;opacity:.5;pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:12px 12px 40px;}
+
+/* ── HEADER ── */
+.header{text-align:center;padding:14px 0 10px;border-bottom:2px dashed var(--shadow);margin-bottom:14px;position:relative;}
+.header h1{font-size:20px;color:var(--accent);letter-spacing:4px;text-shadow:2px 2px 0 #a0d4c4;}
+.header-sub{font-size:8px;color:var(--muted);letter-spacing:3px;margin-top:3px;}
+.settings-btn{position:absolute;right:0;top:14px;padding:4px 8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:9px;}
+
+/* ── COLOR PICKER ── */
+.color-panel{background:var(--card);border:2px solid var(--border);padding:12px;margin-bottom:12px;box-shadow:2px 2px 0 var(--light);}
+.color-label{font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+.color-swatches{display:flex;gap:6px;flex-wrap:wrap;}
+.swatch{width:28px;height:28px;border:2px solid var(--border);cursor:pointer;transition:transform .15s;position:relative;}
+.swatch:hover{transform:scale(1.15);}
+.swatch.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:rgba(0,0,0,0.5);}
+
+/* ── FRIDGE ── */
+.fridge-scene{display:flex;justify-content:center;margin:0 auto 16px;perspective:900px;}
+.fridge-outer{width:220px;border:3px solid var(--fd-dark);background:var(--fd-bg);box-shadow:6px 6px 0 var(--shadow);position:relative;}
+.fridge-interior-top{background:var(--interior);padding:6px;height:220px;border-bottom:3px solid var(--fd-dark);position:relative;overflow:hidden;}
+.fridge-interior-top::before{content:'';position:absolute;top:0;left:0;right:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,240,0.6),transparent);pointer-events:none;z-index:1;}
+.fridge-interior-btm{background:var(--freeze-int);padding:5px 6px;height:85px;}
+.zone-label{font-size:6px;letter-spacing:2px;color:var(--muted);margin-bottom:4px;}
+.food-shelf{display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;min-height:30px;padding-bottom:5px;}
+.shelf-bar{height:3px;background:var(--shelf);margin:3px 0;box-shadow:0 1px 0 var(--shadow);}
+
+/* ── DOORS ── */
+.door-wrap{position:absolute;left:0;right:0;transform-style:preserve-3d;transition:transform 0.75s cubic-bezier(0.4,0,0.2,1);cursor:pointer;z-index:10;}
+.door-wrap.open{transform:rotateY(-130deg);}
+.door-top-wrap{top:0;height:223px;transform-origin:left center;}
+.door-btm-wrap{top:223px;height:88px;transform-origin:left center;}
+.door-face{position:absolute;inset:0;background:var(--fd);border:3px solid var(--fd-dark);backface-visibility:hidden;display:flex;flex-direction:column;overflow:hidden;}
+.door-header{height:10px;background:var(--fd-dark);}
+.door-body{flex:1;padding:8px;display:flex;flex-direction:column;gap:5px;}
+.door-stripe{height:3px;background:rgba(0,0,0,0.1);}
+.door-window{height:32px;background:rgba(255,255,255,0.2);border:1px solid rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;}
+.door-window-text{font-size:6px;letter-spacing:3px;color:rgba(0,0,0,0.35);}
+.door-vent-group{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
+.door-vent{height:2px;background:rgba(0,0,0,0.12);}
+.door-handle{position:absolute;right:-2px;top:50%;transform:translateY(-50%);width:9px;height:36px;background:linear-gradient(to right,var(--shadow),#d8f0e8);border:2px solid var(--fd-dark);box-shadow:2px 2px 0 var(--shadow);}
+.door-btm-handle{height:22px;}
+.door-hint{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-size:6px;letter-spacing:1px;color:rgba(0,0,0,0.35);animation:blink 2s infinite;white-space:nowrap;}
+.door-btm-face{background:linear-gradient(to bottom,var(--fd),#c8dff0);}
+.door-btm-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:7px;letter-spacing:2px;color:rgba(0,0,0,0.3);}
+@keyframes blink{0%,100%{opacity:.5}50%{opacity:.1}}
+
+/* ── PANTRY ── */
+.pantry-scene{display:flex;justify-content:center;margin:0 auto 16px;}
+.pantry-outer{width:220px;background:linear-gradient(to bottom,#d4a870,#c09050);border:3px solid #8a5a20;box-shadow:6px 6px 0 var(--shadow);padding:6px 8px 8px;}
+.pantry-title{font-size:7px;letter-spacing:3px;color:#f5e0c0;text-align:center;margin-bottom:6px;background:#8a5a20;padding:3px;}
+.pantry-shelf-row{min-height:42px;background:rgba(255,255,255,0.15);border-bottom:4px solid #8a5a20;padding:4px 4px 0;display:flex;flex-wrap:wrap;gap:3px;align-items:flex-end;margin-bottom:6px;box-shadow:inset 0 -2px 0 #6a3a10;}
+.pantry-shelf-row:last-child{margin-bottom:4px;}
+.pantry-leg{display:flex;justify-content:space-between;padding:0 14px;}
+.pantry-leg-bar{width:7px;height:12px;background:#8a5a20;box-shadow:2px 0 0 #6a3a10;}
+
+/* ── FOOD ITEMS ── */
+.food-item{position:relative;cursor:pointer;transition:transform .15s;image-rendering:pixelated;display:inline-flex;flex-direction:column;align-items:center;}
+.food-item:hover{transform:translateY(-2px);}
+.food-item svg{display:block;}
+.food-item.warn svg{filter:sepia(50%) hue-rotate(-15deg) brightness(0.9);}
+.food-item.expire svg{filter:grayscale(60%) brightness(0.75);}
+.food-tip{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:6px;color:var(--text);white-space:nowrap;background:rgba(255,255,255,0.92);padding:1px 3px;border:1px solid var(--light);opacity:0;transition:opacity .15s;pointer-events:none;z-index:20;}
+.food-item:hover .food-tip{opacity:1;}
+.food-label{font-size:7px;text-align:center;color:rgba(0,0,0,0.7);line-height:1;letter-spacing:0;white-space:nowrap;position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.75);padding:0 2px;pointer-events:none;}
+
+/* ── STATUS ── */
+.status-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.status-pill{padding:3px 8px;font-size:8px;border:1px solid;letter-spacing:1px;}
+.status-pill.fresh{border-color:var(--fresh);color:var(--fresh);}
+.status-pill.warn{border-color:var(--warn);color:var(--warn);}
+.status-pill.expire{border-color:var(--expire);color:var(--expire);}
+
+/* ── NAV ── */
+.nav{display:flex;gap:6px;margin-bottom:10px;}
+.btn{padding:7px 12px;border:2px solid var(--border);background:var(--cream);color:#4a6a5a;cursor:pointer;font-size:10px;font-family:inherit;box-shadow:2px 2px 0 var(--shadow);transition:all .15s;}
+.btn:hover{transform:translateY(-1px);}
+.btn.active{background:var(--accent);color:var(--cream);box-shadow:3px 3px 0 #2a6a4a;}
+
+/* ── SECTIONS ── */
+.section{background:var(--card);border:2px solid var(--border);padding:12px;margin-bottom:10px;box-shadow:2px 2px 0 var(--light);}
+.sec-title{font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;}
+.item-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--light);}
+.item-row:last-child{border-bottom:none;}
+.item-px{width:30px;height:30px;flex-shrink:0;image-rendering:pixelated;}
+.item-info{flex:1;min-width:0;}
+.item-name{font-size:12px;color:var(--text);}
+.item-meta{font-size:8px;color:var(--muted);margin-top:1px;}
+.fresh-wrap{width:52px;flex-shrink:0;}
+.fresh-bg{height:4px;background:var(--light);}
+.fresh-fill{height:100%;transition:width .3s;}
+.fresh-lbl{font-size:8px;font-weight:700;margin-top:2px;}
+.del-btn{padding:2px 6px;border:1px solid var(--light);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:9px;}
+.del-btn:hover{border-color:var(--expire);color:var(--expire);}
+
+/* ── FORM ── */
+.f-row{margin-bottom:8px;}
+.f-label{font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:3px;}
+.input{width:100%;padding:7px 8px;border:2px solid var(--border);background:var(--cream);font-family:inherit;font-size:11px;color:var(--text);outline:none;}
+.input:focus{border-color:var(--accent);}
+.f-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.sub-btn{width:100%;padding:9px;border:2px solid var(--border);background:var(--accent);color:var(--cream);cursor:pointer;font-size:11px;font-family:inherit;box-shadow:3px 3px 0 #2a6a4a;}
+.sub-btn:hover{transform:translateY(-1px);}
+
+/* ── RECIPE ── */
+.sug-btn{width:100%;padding:9px;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:10px;font-family:inherit;letter-spacing:1px;margin-bottom:10px;box-shadow:2px 2px 0 var(--light);}
+.sug-btn:hover{background:var(--accent);color:var(--cream);}
+.sug-btn:disabled{opacity:.5;cursor:not-allowed;}
+.recipe-card{background:var(--cream);border:2px solid var(--border);padding:12px;margin-bottom:8px;cursor:pointer;box-shadow:2px 2px 0 var(--light);}
+.recipe-card:hover{transform:translateY(-1px);}
+.recipe-name{font-size:13px;color:var(--text);margin-bottom:3px;}
+.recipe-why{font-size:9px;color:var(--muted);font-style:italic;margin-bottom:6px;}
+.rtags{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:6px;}
+.rtag{padding:2px 5px;font-size:8px;border:1px solid;}
+.rtag.have{border-color:var(--fresh);color:var(--fresh);}
+.rtag.need{border-color:var(--warn);color:var(--warn);}
+.rsteps{display:none;border-top:1px dashed var(--light);padding-top:8px;margin-top:4px;}
+.rsteps.show{display:block;}
+.rstep{font-size:10px;color:#4a6a5a;margin-bottom:4px;padding-left:14px;position:relative;line-height:1.6;}
+.rstep::before{content:attr(data-n);position:absolute;left:0;color:var(--muted);font-size:8px;}
+.empty{text-align:center;padding:18px;color:#9ab4ac;font-size:10px;line-height:1.8;}
+.ld::after{content:'';animation:dots 1.2s infinite;}
+@keyframes dots{0%{content:'';}33%{content:'.';}66%{content:'..';}100%{content:'...';};}
+.footer{text-align:center;
+/* cooking log */
+.cook-form{margin-bottom:12px;}
+.photo-upload{border:2px dashed var(--border);background:var(--cream);padding:10px 14px;cursor:pointer;position:relative;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.photo-upload-text{font-size:10px;color:var(--muted);letter-spacing:1px;}
+.photo-upload.selected{border-color:var(--accent);background:var(--cream);}
+.photo-upload.selected .photo-upload-text{color:var(--accent);}
+.cook-card{background:var(--cream);border:2px solid var(--border);margin-bottom:10px;box-shadow:2px 2px 0 var(--light);overflow:hidden;}
+.cook-card-img{width:100%;height:140px;object-fit:cover;display:block;}
+.cook-card-body{padding:10px 12px;}
+.cook-card-name{font-size:14px;color:var(--text);margin-bottom:3px;}
+.cook-card-meta{font-size:8px;color:var(--muted);margin-bottom:5px;}
+.cook-card-note{font-size:11px;color:#5a6a5a;font-style:italic;line-height:1.6;}
+.cook-card-del{float:right;padding:2px 6px;border:1px solid var(--light);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:9px;}
+.cook-card-del:hover{border-color:var(--expire);color:var(--expire);}
+
+.receipt-btn{padding:3px 8px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:inherit;font-size:8px;letter-spacing:1px;margin-top:5px;}
+.receipt-btn:hover{background:var(--accent);color:var(--cream);}
+.no-img-placeholder{height:60px;background:var(--light);display:flex;align-items:center;justify-content:center;font-size:20px;}padding:14px;font-size:8px;color:#9ab4ac;letter-spacing:2px;border-top:1px dashed var(--light);margin-top:8px;}
+
+/* search */
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-input{width:100%;padding:7px 30px 7px 9px;border:2px solid var(--border);background:var(--cream);font-family:inherit;font-size:11px;color:var(--text);outline:none;}
+.search-input:focus{border-color:var(--accent);}
+.search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;}
+
+/* templates */
+.tmpl-section{margin-bottom:12px;}
+.tmpl-label{font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.tmpl-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.tmpl-chip{padding:4px 8px;border:1px solid var(--border);background:var(--cream);font-size:10px;cursor:pointer;font-family:inherit;color:var(--text);display:flex;align-items:center;gap:4px;}
+.tmpl-chip:hover{background:var(--accent);color:var(--cream);border-color:var(--accent);}
+.tmpl-del{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:0;}
+.tmpl-del:hover{color:var(--expire);}
+
+/* stats */
+.stats-section{background:var(--card);border:2px solid var(--border);padding:12px;margin-bottom:10px;box-shadow:2px 2px 0 var(--light);}
+.stats-toggle{width:100%;background:none;border:none;text-align:left;font-size:8px;letter-spacing:2px;color:var(--muted);cursor:pointer;font-family:inherit;padding:0;display:flex;justify-content:space-between;}
+.stats-body{margin-top:10px;}
+.stat-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.stat-name{font-size:9px;color:var(--text);width:48px;flex-shrink:0;}
+.stat-bar-bg{flex:1;height:8px;background:var(--light);}
+.stat-bar-fill{height:100%;transition:width .4s;}
+.stat-count{font-size:8px;color:var(--muted);width:20px;text-align:right;flex-shrink:0;}
+
+/* delete modal */
+.del-modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;display:flex;align-items:center;justify-content:center;}
+.del-modal-box{background:var(--card);border:2px solid var(--border);padding:20px;box-shadow:6px 6px 0 var(--shadow);width:240px;}
+.del-modal-title{font-size:12px;color:var(--text);margin-bottom:6px;}
+.del-modal-name{font-size:14px;color:var(--accent);font-style:italic;margin-bottom:14px;}
+.del-modal-btns{display:flex;gap:8px;}
+.del-modal-btn{flex:1;padding:8px;border:2px solid var(--border);background:var(--cream);font-family:inherit;font-size:10px;cursor:pointer;text-align:center;}
+.del-modal-btn:hover{background:var(--accent);color:var(--cream);border-color:var(--accent);}
+
+/* log */
+.log-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--light);font-size:10px;color:var(--muted);}
+.log-row:last-child{border-bottom:none;}
+.log-icon{font-size:12px;width:18px;text-align:center;}
+.log-name{flex:1;color:var(--text);}
+.log-date{font-size:8px;}
+.scene-tabs{display:flex;margin:0 auto 10px;width:220px;}
+.scene-tab{flex:1;padding:6px 0;text-align:center;font-size:9px;letter-spacing:2px;border:2px solid var(--border);background:var(--cream);color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;}
+.scene-tab:first-child{border-right:none;}
+.scene-tab.active{background:var(--accent);color:var(--cream);border-color:var(--accent);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <h1>FRIDGE</h1>
+  <div class="header-sub">像素冰箱 · 食材管理</div>
+  <button class="settings-btn" onclick="toggleColors()">⚙ 颜色</button>
+</div>
+
+<div class="color-panel" id="color-panel" style="display:none">
+  <div class="color-label">冰箱颜色 FRIDGE COLOR</div>
+  <div class="color-swatches" id="color-swatches"></div>
+</div>
+
+<!-- Scene tabs -->
+<div class="scene-tabs">
+  <button class="scene-tab active" id="tab-fridge-btn" onclick="switchScene('fridge')">🧊 冰箱</button>
+  <button class="scene-tab" id="tab-pantry-btn" onclick="switchScene('pantry')">🧂 调料区</button>
+</div>
+
+<!-- Fridge -->
+<div id="scene-fridge">
+<div class="fridge-scene">
+  <div class="fridge-outer" id="fridge-outer">
+    <div class="fridge-interior-top">
+      <div class="zone-label">冷藏 FRIDGE</div>
+      <div class="food-shelf" id="shelf1"></div>
+      <div class="shelf-bar"></div>
+      <div class="food-shelf" id="shelf2"></div>
+      <div class="shelf-bar"></div>
+      <div class="food-shelf" id="shelf3"></div>
+    </div>
+    <div class="fridge-interior-btm">
+      <div class="zone-label">冷冻 FREEZER</div>
+      <div class="food-shelf" id="shelf-freeze"></div>
+    </div>
+    <div class="door-wrap door-top-wrap" id="door-top" onclick="toggleDoor('top')">
+      <div class="door-face">
+        <div class="door-header"></div>
+        <div class="door-body">
+          <div class="door-window"><div class="door-window-text">FRIDGE</div></div>
+          <div class="door-stripe"></div><div class="door-stripe"></div>
+          <div class="door-vent-group">
+            <div class="door-vent"></div><div class="door-vent"></div>
+            <div class="door-vent"></div><div class="door-vent"></div>
+          </div>
+        </div>
+        <div class="door-handle"></div>
+        <div class="door-hint">点击开门</div>
+      </div>
+    </div>
+    <div class="door-wrap door-btm-wrap" id="door-btm" onclick="toggleDoor('btm')">
+      <div class="door-face door-btm-face">
+        <div class="door-handle door-btm-handle"></div>
+        <div class="door-btm-label">— FREEZE —</div>
+        <div class="door-hint">点击开门</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /scene-fridge -->
+
+<!-- Pantry -->
+<div id="scene-pantry" style="display:none">
+<div class="pantry-scene">
+  <div class="pantry-outer">
+    <div class="pantry-title">— 调料区 PANTRY —</div>
+    <div class="pantry-shelf-row" id="pantry-shelf1"></div>
+    <div class="pantry-shelf-row" id="pantry-shelf2"></div>
+    <div class="pantry-leg">
+      <div class="pantry-leg-bar"></div>
+      <div class="pantry-leg-bar"></div>
+    </div>
+  </div>
+</div>
+</div><!-- /scene-pantry -->
+
+<div class="status-row" id="status-row"></div>
+<div class="nav">
+  <button class="btn active" onclick="showTab('list')">📋 食材</button>
+  <button class="btn" onclick="showTab('add')">＋ 添加</button>
+  <button class="btn" onclick="showTab('recipe')">🍳 做什么菜</button>
+  <button class="btn" onclick="showTab('diary')">📷 日记</button>
+</div>
+
+<div id="tab-list">
+  <!-- Search -->
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" placeholder="搜索食材..." oninput="renderList()">
+    <button class="search-clear" onclick="document.getElementById('search-input').value='';renderList()">×</button>
+  </div>
+  <!-- Stats -->
+  <div class="stats-section">
+    <button class="stats-toggle" onclick="toggleStats()">
+      <span>📊 库存统计</span><span id="stats-arrow">▾</span>
+    </button>
+    <div class="stats-body" id="stats-body" style="display:none">
+      <div id="stats-content"></div>
+    </div>
+  </div>
+  <div class="section"><div class="sec-title">冷藏 FRIDGE</div><div id="list-fridge"></div></div>
+  <div class="section"><div class="sec-title">冷冻 FREEZER</div><div id="list-freeze"></div></div>
+  <div class="section"><div class="sec-title">调料架 PANTRY</div><div id="list-pantry"></div></div>
+  <!-- Log -->
+  <div class="section"><div class="sec-title">最近记录</div><div id="list-log"></div></div>
+</div>
+
+<div id="tab-add" style="display:none">
+  <div class="section">
+    <div class="sec-title">添加食材</div>
+    <div class="tmpl-section" id="tmpl-section">
+      <div class="tmpl-label">常用模板 TEMPLATES</div>
+      <div class="tmpl-chips" id="tmpl-chips"></div>
+    </div>
+    <div class="f-row"><div class="f-label">食材名称</div><input class="input" id="f-name" placeholder="鸡蛋、牛奶、酱油..."></div>
+    <div class="f-2">
+      <div class="f-row"><div class="f-label">数量</div><input class="input" id="f-qty" placeholder="6个、500g..."></div>
+      <div class="f-row"><div class="f-label">分类</div>
+        <select class="input" id="f-cat">
+          <option value="蛋奶">蛋奶</option><option value="蔬菜">蔬菜</option>
+          <option value="肉类">肉类</option><option value="海鲜">海鲜</option>
+          <option value="水果">水果</option><option value="豆制品">豆制品</option>
+          <option value="饮料">饮料</option><option value="调味料">调味料</option>
+          <option value="其他">其他</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-row"><div class="f-label">存放位置</div>
+      <select class="input" id="f-zone">
+        <option value="fridge">冷藏</option>
+        <option value="freeze">冷冻</option>
+        <option value="pantry">调料架</option>
+      </select>
+    </div>
+    <div class="f-2">
+      <div class="f-row"><div class="f-label">放入日期</div><input class="input" type="date" id="f-date"></div>
+      <div class="f-row"><div class="f-label">保质期（天）</div><input class="input" type="number" id="f-days" placeholder="7"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <button class="sub-btn" style="flex:2" onclick="addItem()">放入 →</button>
+      <button class="sub-btn" style="flex:1;background:transparent;color:var(--accent);box-shadow:none;" onclick="saveTemplate()">★ 保存模板</button>
+    </div>
+  </div>
+</div>
+
+<div id="tab-recipe" style="display:none">
+  <button class="sug-btn" id="sug-btn" onclick="suggest()">🍳 根据现有食材推荐菜谱</button>
+  <div id="recipes"></div>
+</div>
+
+<div id="tab-diary" style="display:none">
+  <div class="section cook-form">
+    <div class="sec-title">记录今天做了什么</div>
+    <div class="f-row"><div class="f-label">菜名</div><input class="input" id="d-name" placeholder="番茄炒蛋、红烧肉..."></div>
+    <div class="f-2">
+      <div class="f-row"><div class="f-label">日期</div><input class="input" type="date" id="d-date"></div>
+      <div class="f-row"><div class="f-label">评分</div>
+        <select class="input" id="d-rating">
+          <option value="5">⭐⭐⭐⭐⭐ 太好了</option>
+          <option value="4">⭐⭐⭐⭐ 不错</option>
+          <option value="3">⭐⭐⭐ 一般</option>
+          <option value="2">⭐⭐ 还需练习</option>
+          <option value="1">⭐ 翻车了</option>
+        </select>
+      </div>
+    </div>
+    <div class="f-row"><div class="f-label">备注</div><textarea class="input" id="d-note" rows="2" placeholder="用了什么食材，有什么心得..." style="resize:none"></textarea></div>
+    <div class="f-row">
+      <div class="f-label">照片（可选）</div>
+      <div class="photo-upload" id="photo-upload-area" onclick="document.getElementById('photo-file-input').click()">
+        <span id="photo-upload-text">📷 点击选择照片</span>
+      </div>
+      <input type="file" id="photo-file-input" accept="image/*" style="display:none" onchange="handlePhoto(this)">
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="sub-btn" style="flex:2" onclick="addCookLog()">记录 →</button>
+      <button class="sub-btn" style="flex:1;background:transparent;color:var(--muted);box-shadow:none;font-size:9px" onclick="clearPhotoPreview()">清除照片</button>
+    </div>
+  </div>
+  <div id="cook-log-list"></div>
+</div>
+
+<!-- receipt saves directly via download -->
+
+<div class="footer">PIXEL FRIDGE · 像素冰箱</div>
+
+<!-- Delete reason modal -->
+<div class="del-modal" id="del-modal" style="display:none">
+  <div class="del-modal-box">
+    <div class="del-modal-title">移除食材</div>
+    <div class="del-modal-name" id="del-modal-name"></div>
+    <div class="del-modal-btns">
+      <div class="del-modal-btn" onclick="confirmDel('eaten')">✓ 吃完了</div>
+      <div class="del-modal-btn" onclick="confirmDel('tossed')">🗑 扔掉了</div>
+      <div class="del-modal-btn" onclick="cancelDel()">取消</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ── THEMES ── */
+const THEMES=[
+  {name:'薄荷绿',bg:'#e8f4f0',card:'#f4fbf8',border:'#5a8a7a',accent:'#3a8a6a',cream:'#f0faf5',light:'#c0ddd5',shadow:'#8ab4a8',text:'#2a4a3a',muted:'#6a8a7a',fresh:'#3a9a5a',warn:'#d4901c',expire:'#b04040',fd:'#c8e8e0',fdDark:'#3a6a5a',fdBg:'#d8f0e8',interior:'#d0ece8',freeze:'#c8e4f4',shelf:'#9abcb4'},
+  {name:'奶白',bg:'#f5f0e8',card:'#fdfaf5',border:'#9a8a78',accent:'#7a6a50',cream:'#fdfaf5',light:'#e0d8cc',shadow:'#c4b8a8',text:'#3a3028',muted:'#8a7a6a',fresh:'#6a9a40',warn:'#c88020',expire:'#aa3030',fd:'#f0ede8',fdDark:'#6a6058',fdBg:'#f8f5f0',interior:'#f8f4ee',freeze:'#e8f0f8',shelf:'#d4ccc0'},
+  {name:'天蓝',bg:'#e0eef8',card:'#f0f8ff',border:'#5a8aaa',accent:'#3a6a9a',cream:'#f0f8ff',light:'#c0d8f0',shadow:'#8ab0cc',text:'#1a3050',muted:'#5a7a9a',fresh:'#3a8a6a',warn:'#c8801c',expire:'#aa3040',fd:'#c0d8f0',fdDark:'#3a5a8a',fdBg:'#d0e8f8',interior:'#d8ecf8',freeze:'#c0d0f0',shelf:'#90b4d0'},
+  {name:'玫瑰',bg:'#f8ece8',card:'#fff5f4',border:'#aa7a7a',accent:'#9a4a5a',cream:'#fff5f4',light:'#f0d4cc',shadow:'#d4aaa0',text:'#3a1a1a',muted:'#9a6a6a',fresh:'#5a8a5a',warn:'#c87820',expire:'#aa2020',fd:'#f0d0d8',fdDark:'#8a3a4a',fdBg:'#f8dce4',interior:'#f8dce4',freeze:'#e8d0e4',shelf:'#d4a8a8'},
+  {name:'银灰',bg:'#e8e8ec',card:'#f5f5f8',border:'#7a7a88',accent:'#5a5a70',cream:'#f5f5f8',light:'#d4d4dc',shadow:'#b4b4c4',text:'#2a2a38',muted:'#7a7a88',fresh:'#4a8a6a',warn:'#b87820',expire:'#9a3030',fd:'#d8d8e0',fdDark:'#4a4a58',fdBg:'#e4e4ec',interior:'#dcdce4',freeze:'#ccd0dc',shelf:'#b4b4c4'},
+  {name:'深绿',bg:'#c0d8c8',card:'#d0e8d8',border:'#2a5a3a',accent:'#1a4a2a',cream:'#d0e8d8',light:'#a0c0a8',shadow:'#6a9878',text:'#0a2a1a',muted:'#3a6048',fresh:'#2a7a3a',warn:'#b87010',expire:'#8a2020',fd:'#8ab8a0',fdDark:'#1a4a30',fdBg:'#9ac8a8',interior:'#b0d4bc',freeze:'#a0c4d4',shelf:'#6a9878'},
+];
+
+function applyTheme(idx){
+  const t=THEMES[idx],r=document.documentElement.style;
+  ['bg','card','border','accent','cream','light','shadow','text','muted','fresh','warn','expire'].forEach(k=>r.setProperty(`--${k}`,t[k]));
+  r.setProperty('--fd',t.fd);r.setProperty('--fd-dark',t.fdDark);r.setProperty('--fd-bg',t.fdBg);
+  r.setProperty('--interior',t.interior);r.setProperty('--freeze-int',t.freeze);r.setProperty('--shelf',t.shelf);
+  document.body.style.background=t.bg;
+  localStorage.setItem('fridge_theme',idx);
+  document.querySelectorAll('.swatch').forEach((s,i)=>s.classList.toggle('active',i===idx));
+}
+function buildSwatches(){
+  document.getElementById('color-swatches').innerHTML=THEMES.map((t,i)=>`<div class="swatch" style="background:${t.fd};border-color:${t.fdDark}" onclick="applyTheme(${i})" title="${t.name}"></div>`).join('');
+  applyTheme(parseInt(localStorage.getItem('fridge_theme')||'0'));
+}
+function toggleColors(){const p=document.getElementById('color-panel');p.style.display=p.style.display==='none'?'block':'none';}
+
+/* ── PIXEL ART ── */
+const SZ=3;
+function mkSvg(grid,pal){
+  const h=grid.length,w=grid[0].length;
+  let r='';
+  grid.forEach((row,y)=>row.forEach((c,x)=>{if(c&&pal[c])r+=`<rect x="${x*SZ}" y="${y*SZ}" width="${SZ}" height="${SZ}" fill="${pal[c]}"/>`;}));
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w*SZ}" height="${h*SZ}" viewBox="0 0 ${w*SZ} ${h*SZ}" style="image-rendering:pixelated"><rect width="${w*SZ}" height="${h*SZ}" fill="none"/>${r}</svg>`;
+}
+const W='#f0ede0',S='#d4caaa',Y='#ffc820',y='#e0a000',
+      M='#e8f4ff',B='#4a9ad4',b='#2a72aa',
+      G='#4ab840',g='#2a8020',gs='#6a4a20',
+      R='#c84040',r2='#902020',rw='#f0d0c0',
+      F='#8ab8c8',ff='#2a4a5a',fw='#f0f0f0',
+      A='#e04040',aa='#a01818',Al='#3a9020',
+      T='#f0ece0',tt='#c0bca8',
+      D='#d83030',Dw='#f0f0f0',
+      Cs='#e8a020',Cb='#b07010',
+      H='#f09060',Hd='#303030',
+      Bx='#c89040',bx='#906020',BW='#f0d890';
+
+const PIXEL={
+  egg:()=>mkSvg([[0,0,0,W,W,W,W,0,0,0],[0,0,W,W,W,W,W,W,0,0],[0,W,W,S,W,W,S,W,W,0],[W,W,W,W,W,W,W,W,W,W],[W,W,W,Y,Y,Y,W,W,W,W],[W,W,Y,Y,y,Y,Y,W,W,W],[W,W,W,Y,Y,Y,W,W,W,W],[0,W,W,W,W,W,W,W,W,0],[0,0,W,W,W,W,W,W,0,0],[0,0,0,S,S,S,S,0,0,0]],{[W]:W,[S]:S,[Y]:Y,[y]:y}),
+  milk:()=>mkSvg([[0,0,M,M,M,M,M,M,0,0],[0,M,b,b,B,B,b,b,M,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,B,B,B,B,B,B,B,B,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,0,b,b,b,b,b,b,0,0]],{[M]:M,[B]:B,[b]:b}),
+  veg:()=>mkSvg([[0,0,0,G,g,G,0,0,0,0],[0,0,G,G,g,G,G,0,0,0],[0,G,G,G,G,G,G,G,0,0],[G,G,g,G,G,G,g,G,G,0],[G,G,G,G,G,G,G,G,G,0],[0,G,G,G,G,G,G,G,0,0],[0,0,g,G,g,G,g,0,0,0],[0,0,0,gs,gs,gs,0,0,0,0],[0,0,gs,gs,0,gs,gs,0,0,0],[0,0,0,0,0,0,0,0,0,0]],{[G]:G,[g]:g,[gs]:gs}),
+  meat:()=>mkSvg([[0,0,0,0,0,gs,gs,0,0,0],[0,0,0,0,gs,gs,gs,gs,0,0],[0,0,R,R,R,R,R,0,0,0],[0,R,R,r2,R,R,r2,R,R,0],[R,R,r2,rw,rw,r2,R,R,R,0],[R,R,R,rw,R,R,R,R,R,0],[0,R,R,R,R,R,R,R,0,0],[0,0,R,R,R,R,R,0,0,0],[0,0,0,r2,r2,r2,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]],{[R]:R,[r2]:r2,[rw]:rw,[gs]:gs}),
+  fish:()=>mkSvg([[0,0,0,0,0,0,F,0,F,0],[0,0,0,0,0,F,F,F,F,F],[0,F,F,F,F,F,F,F,F,0],[F,F,F,ff,F,F,fw,F,F,0],[F,F,F,F,F,F,F,F,F,F],[F,F,F,F,F,F,F,F,F,0],[0,F,F,F,F,F,F,F,F,0],[0,0,0,0,0,F,F,F,F,F],[0,0,0,0,0,0,F,0,F,0],[0,0,0,0,0,0,0,0,0,0]],{[F]:F,[ff]:ff,[fw]:fw}),
+  fruit:()=>mkSvg([[0,0,0,0,Al,0,0,0,0,0],[0,0,0,Al,Al,Al,0,0,0,0],[0,0,A,A,A,A,A,0,0,0],[0,A,A,aa,A,A,A,A,0,0],[A,A,A,A,A,A,A,A,A,0],[A,A,A,A,A,A,A,A,A,0],[A,A,A,A,A,A,A,A,A,0],[0,A,A,A,A,A,A,A,0,0],[0,0,A,A,A,A,A,0,0,0],[0,0,0,aa,aa,aa,0,0,0,0]],{[A]:A,[aa]:aa,[Al]:Al}),
+  tofu:()=>mkSvg([[0,0,0,0,0,0,0,0,0,0],[0,T,T,T,T,T,T,T,T,0],[T,T,tt,T,T,T,tt,T,T,T],[T,T,T,T,T,T,T,T,T,T],[T,T,tt,T,T,T,tt,T,T,T],[T,T,T,T,T,T,T,T,T,T],[T,T,tt,T,T,T,tt,T,T,T],[T,T,T,T,T,T,T,T,T,T],[0,T,T,T,T,T,T,T,T,0],[0,0,tt,tt,tt,tt,tt,tt,0,0]],{[T]:T,[tt]:tt}),
+  drink:()=>mkSvg([[0,0,D,D,D,D,D,D,0,0],[0,0,D,Dw,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,Dw,Dw,Dw,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,Dw,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,0,D,D,D,D,0,0,0]],{[D]:D,[Dw]:Dw}),
+  condiment:()=>mkSvg([[0,0,0,Cs,Cs,Cs,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,0,0,0],[0,0,0,Cb,Cb,Cb,0,0,0,0],[0,Cb,Cb,Cb,Cb,Cb,Cb,Cb,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,Cb,Cb,Cb,Cb,Cb,Cb,Cb,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,0,Cb,Cb,Cb,Cb,Cb,0,0,0]],{[Cs]:Cs,[Cb]:Cb}),
+  seafood:()=>mkSvg([[0,0,0,0,H,H,0,0,0,0],[0,0,0,H,H,H,H,0,0,0],[0,0,H,H,H,H,H,H,0,0],[0,H,H,Hd,H,H,H,H,H,0],[H,H,H,H,H,H,H,H,H,H],[H,H,H,H,H,H,H,H,H,0],[0,H,H,H,H,H,H,H,0,0],[0,0,H,H,H,H,H,0,0,0],[0,0,0,H,H,H,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]],{[H]:H,[Hd]:Hd}),
+  box:()=>mkSvg([[0,0,0,0,0,0,0,0,0,0],[0,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[Bx,BW,bx,BW,BW,BW,bx,BW,BW,Bx],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[Bx,BW,bx,BW,BW,BW,bx,BW,BW,Bx],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[0,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,0],[0,0,bx,bx,bx,bx,bx,bx,0,0]],{[Bx]:Bx,[bx]:bx,[BW]:BW}),
+};
+
+// Generate a stable hue from food name (0-359)
+function nameHue(name){
+  let h=0;
+  for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%360;
+  return h;
+}
+
+// Wrap SVG with hue-rotate filter for color variation
+function colored(svg, deg){
+  if(!deg) return svg;
+  return `<span style="display:inline-block;filter:hue-rotate(${deg}deg)">${svg}</span>`;
+}
+
+function getPixel(cat,name){
+  const n=(name||'').toLowerCase();
+  const h=nameHue(name||'');
+  // Specific matches — use pixel art as-is (shape is already distinctive)
+  if(/蛋|egg/.test(n)) return PIXEL.egg();
+  if(/奶|milk|牛奶/.test(n)) return PIXEL.milk();
+  if(/虾|鱼|蟹|海/.test(n)) return PIXEL.seafood();
+  if(/肉|鸡|猪|牛肉|排/.test(n)) return PIXEL.meat();
+  if(/苹|橙|桃|莓|梨|果/.test(n)) return PIXEL.fruit();
+  if(/豆腐|tofu/.test(n)) return PIXEL.tofu();
+  if(/汁|可乐|啤|饮料/.test(n)) return PIXEL.drink();
+  // Condiments — same bottle shape, different color per name
+  if(/酱|盐|醋|油|料|sauce/.test(n)) return colored(PIXEL.condiment(), h);
+  // Vegetables — same shape, subtle hue shift
+  if(/菜|菠|白|韭|胡萝|葱|蒜/.test(n)) return colored(PIXEL.veg(), h%60-30);
+  // Category fallbacks
+  if(cat==='蛋奶') return PIXEL.milk();
+  if(cat==='蔬菜') return colored(PIXEL.veg(), h%60-30);
+  if(cat==='肉类') return PIXEL.meat();
+  if(cat==='海鲜') return PIXEL.seafood();
+  if(cat==='水果') return colored(PIXEL.fruit(), h%60-30);
+  if(cat==='豆制品') return PIXEL.tofu();
+  if(cat==='饮料') return colored(PIXEL.drink(), h);
+  if(cat==='调味料') return colored(PIXEL.condiment(), h);
+  // Generic box — full hue rotation so each item is a unique color
+  return colored(PIXEL.box(), h);
+}
+
+/* ── DATA ── */
+const KEY='pxfridge3';
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]');}catch{return[];}};
+const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+const daysLeft=it=>{const e=new Date(it.date);e.setDate(e.getDate()+it.expiryDays);return Math.ceil((e-new Date())/86400000);};
+const freshCls=it=>{const d=daysLeft(it),r=d/it.expiryDays;if(d<=0)return'expire';if(r<0.25||d<=3)return'warn';return'fresh';};
+const freshCol=c=>c==='fresh'?'#3a9a5a':c==='warn'?'#d4901c':'#b04040';
+
+/* ── DOORS ── */
+const doorState={top:false,btm:false};
+function toggleDoor(w){
+  doorState[w]=!doorState[w];
+  document.getElementById(`door-${w}`).classList.toggle('open',doorState[w]);
+  if(doorState[w]) renderShelves();
+}
+
+/* ── SHELVES ── */
+function renderShelves(){
+  const items=load();
+  const fridge=items.filter(i=>i.zone==='fridge');
+  const freeze=items.filter(i=>i.zone==='freeze');
+  const pantry=items.filter(i=>i.zone==='pantry');
+  const sh=[[],[],[]];
+  fridge.forEach((it,i)=>sh[i%3].push(it));
+  ['shelf1','shelf2','shelf3'].forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=sh[i].map(it=>`<div class="food-item ${freshCls(it)}">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div><div class="food-tip">${it.name}</div></div>`).join('')||'<span style="font-size:6px;color:#9ab4ac">空</span>';
+  });
+  const fz=document.getElementById('shelf-freeze');
+  if(fz) fz.innerHTML=freeze.map(it=>`<div class="food-item ${freshCls(it)}">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div><div class="food-tip">${it.name}</div></div>`).join('')||'<span style="font-size:6px;color:#9ab4ac">空</span>';
+  const ps=[[],[]];
+  pantry.forEach((it,i)=>ps[i%2].push(it));
+  ['pantry-shelf1','pantry-shelf2'].forEach((id,i)=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML=ps[i].map(it=>`<div class="food-item ${freshCls(it)}">${getPixel(it.cat,it.name)}<div class="food-label">${it.name.slice(0,2)}</div><div class="food-tip">${it.name}</div></div>`).join('')||'<span style="font-size:6px;color:#c0a080">空</span>';
+  });
+}
+
+/* ── LIST ── */
+function renderList(){
+  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  const allItems=load();
+  const items=q?allItems.filter(i=>i.name.toLowerCase().includes(q)||i.cat.includes(q)):allItems;
+  const fr=items.filter(i=>i.zone==='fridge'),fz=items.filter(i=>i.zone==='freeze'),pt=items.filter(i=>i.zone==='pantry');
+  const fn=items.filter(i=>freshCls(i)==='fresh').length,wn=items.filter(i=>freshCls(i)==='warn').length,en=items.filter(i=>freshCls(i)==='expire').length;
+  document.getElementById('status-row').innerHTML=[
+    !items.length?'<div class="status-pill fresh">空空如也</div>':'',
+    fn?`<div class="status-pill fresh">✓ 新鲜 ${fn}</div>`:'',
+    wn?`<div class="status-pill warn">⚠ 快过期 ${wn}</div>`:'',
+    en?`<div class="status-pill expire">✕ 已过期 ${en}</div>`:'',
+  ].join('');
+  const row=it=>{
+    const d=daysLeft(it),cls=freshCls(it),col=freshCol(cls),pct=Math.max(0,Math.min(100,(d/it.expiryDays)*100));
+    const lbl=d<=0?'已过期':d===1?'明天到期':`还有${d}天`;
+    return `<div class="item-row"><div class="item-px">${getPixel(it.cat,it.name)}</div><div class="item-info"><div class="item-name">${it.name}${it.qty?' · '+it.qty:''}</div><div class="item-meta">${it.cat} · ${it.date}</div></div><div class="fresh-wrap"><div class="fresh-bg"><div class="fresh-fill" style="width:${pct}%;background:${col}"></div></div><div class="fresh-lbl" style="color:${col}">${lbl}</div></div><button class="del-btn" onclick="delItem('${it.id}')">✕</button></div>`;
+  };
+  document.getElementById('list-fridge').innerHTML=fr.length?fr.map(row).join(''):'<div class="empty">冷藏室是空的</div>';
+  document.getElementById('list-freeze').innerHTML=fz.length?fz.map(row).join(''):'<div class="empty">冷冻室是空的</div>';
+  document.getElementById('list-pantry').innerHTML=pt.length?pt.map(row).join(''):'<div class="empty">调料架是空的</div>';
+  renderLog();
+}
+
+/* ── ADD / DEL ── */
+function addItem(){
+  const name=document.getElementById('f-name').value.trim(),qty=document.getElementById('f-qty').value.trim(),zone=document.getElementById('f-zone').value,cat=document.getElementById('f-cat').value,date=document.getElementById('f-date').value,days=parseInt(document.getElementById('f-days').value);
+  if(!name||!date||!days){alert('请填写名称、日期和保质期');return;}
+  const items=load();items.push({id:Date.now().toString(),name,qty,zone,cat,date,expiryDays:days});save(items);
+  document.getElementById('f-name').value='';document.getElementById('f-qty').value='';document.getElementById('f-days').value='';
+  renderShelves();showTab('list');
+}
+/* ── TEMPLATES ── */
+const TMPL_KEY='pxfridge_templates';
+const loadTemplates=()=>{try{return JSON.parse(localStorage.getItem(TMPL_KEY)||'[]');}catch{return[];}};
+const saveTemplates=d=>localStorage.setItem(TMPL_KEY,JSON.stringify(d));
+
+function renderTemplates(){
+  const ts=loadTemplates();
+  const el=document.getElementById('tmpl-chips');if(!el)return;
+  if(!ts.length){el.innerHTML='<span style="font-size:9px;color:var(--muted)">暂无模板，添加后点★保存</span>';return;}
+  el.innerHTML=ts.map((t,i)=>`
+    <div class="tmpl-chip" onclick="fillTemplate(${i})">
+      ${t.name}${t.qty?' · '+t.qty:''}
+      <button class="tmpl-del" onclick="event.stopPropagation();removeTmpl(${i})">×</button>
+    </div>`).join('');
+}
+function saveTemplate(){
+  const name=document.getElementById('f-name').value.trim();
+  const qty=document.getElementById('f-qty').value.trim();
+  const zone=document.getElementById('f-zone').value;
+  const cat=document.getElementById('f-cat').value;
+  const days=parseInt(document.getElementById('f-days').value)||0;
+  if(!name){alert('请先填写食材名称');return;}
+  const ts=loadTemplates();
+  if(ts.find(t=>t.name===name)){alert('已有同名模板');return;}
+  ts.push({name,qty,zone,cat,days});
+  saveTemplates(ts);renderTemplates();
+}
+function fillTemplate(i){
+  const t=loadTemplates()[i];if(!t)return;
+  document.getElementById('f-name').value=t.name||'';
+  document.getElementById('f-qty').value=t.qty||'';
+  document.getElementById('f-zone').value=t.zone||'fridge';
+  document.getElementById('f-cat').value=t.cat||'其他';
+  document.getElementById('f-days').value=t.days||'';
+}
+function removeTmpl(i){
+  const ts=loadTemplates();ts.splice(i,1);saveTemplates(ts);renderTemplates();
+}
+
+/* ── STATS ── */
+const CAT_COLORS={'蛋奶':'#f0c840','蔬菜':'#4ab840','肉类':'#c84040','海鲜':'#4a9ad4','水果':'#e04040','豆制品':'#f0ece0','饮料':'#d83030','调味料':'#e8a020','其他':'#c89040'};
+function toggleStats(){
+  const el=document.getElementById('stats-body');
+  const arr=document.getElementById('stats-arrow');
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  arr.textContent=open?'▴':'▾';
+  if(open) renderStats();
+}
+function renderStats(){
+  const items=load();
+  if(!items.length){document.getElementById('stats-content').innerHTML='<div class="empty">暂无食材</div>';return;}
+  const counts={};
+  items.forEach(it=>{counts[it.cat]=(counts[it.cat]||0)+1;});
+  const max=Math.max(...Object.values(counts));
+  document.getElementById('stats-content').innerHTML=
+    Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([cat,n])=>`
+      <div class="stat-row">
+        <div class="stat-name">${cat}</div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${(n/max*100).toFixed(0)}%;background:${CAT_COLORS[cat]||'#888'}"></div></div>
+        <div class="stat-count">${n}</div>
+      </div>`).join('');
+}
+
+/* ── LOG ── */
+const LOG_KEY='pxfridge_log';
+const loadLog=()=>{try{return JSON.parse(localStorage.getItem(LOG_KEY)||'[]');}catch{return[];}};
+const saveLog=d=>localStorage.setItem(LOG_KEY,JSON.stringify(d.slice(-30)));// keep last 30
+
+let _pendingDelId=null;
+function delItem(id){
+  const item=load().find(i=>i.id===id);
+  if(!item)return;
+  _pendingDelId=id;
+  document.getElementById('del-modal-name').textContent=item.name+(item.qty?' · '+item.qty:'');
+  document.getElementById('del-modal').style.display='flex';
+}
+function confirmDel(reason){
+  if(!_pendingDelId)return;
+  const items=load();
+  const item=items.find(i=>i.id===_pendingDelId);
+  if(item){
+    const log=loadLog();
+    log.push({name:item.name,reason,date:new Date().toISOString().split('T')[0]});
+    saveLog(log);
+  }
+  save(items.filter(i=>i.id!==_pendingDelId));
+  _pendingDelId=null;
+  document.getElementById('del-modal').style.display='none';
+  renderList();renderShelves();
+}
+function cancelDel(){
+  _pendingDelId=null;
+  document.getElementById('del-modal').style.display='none';
+}
+function renderLog(){
+  const log=loadLog().reverse().slice(0,10);
+  const el=document.getElementById('list-log');if(!el)return;
+  if(!log.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
+  el.innerHTML=log.map(l=>`<div class="log-row">
+    <div class="log-icon">${l.reason==='eaten'?'✓':'🗑'}</div>
+    <div class="log-name">${l.name}</div>
+    <div class="log-date">${l.reason==='eaten'?'吃完了':'扔掉了'} · ${l.date}</div>
+  </div>`).join('');
+}
+
+/* ── RECIPE ── */
+async function suggest(){
+  const items=load();if(!items.length){alert('食材是空的');return;}
+  const btn=document.getElementById('sug-btn');btn.disabled=true;btn.innerHTML='<span class="ld">思考中</span>';document.getElementById('recipes').innerHTML='';
+  try{
+    const res=await fetch('https://miuxbmxwqcpjvpfydjzq.supabase.co/functions/v1/fridge-recipe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ingredients:items.map(i=>({name:i.name,quantity:i.qty||'适量',daysLeft:daysLeft(i)}))})});
+    const data=await res.json();if(data.error)throw new Error(data.error);renderRecipes(data.recipes||[]);
+  }catch(e){document.getElementById('recipes').innerHTML=`<div class="empty">获取失败：${e.message}</div>`;}
+  btn.disabled=false;btn.innerHTML='🍳 重新推荐';
+}
+function renderRecipes(rs){
+  if(!rs.length){document.getElementById('recipes').innerHTML='<div class="empty">暂无推荐</div>';return;}
+  document.getElementById('recipes').innerHTML=rs.map((r,i)=>`<div class="recipe-card" onclick="toggleSteps(${i})"><div class="recipe-name">${r.emoji||'🍽'} ${r.name}</div><div class="recipe-why">${r.reason||''}</div><div class="rtags">${(r.ingredients_have||[]).map(t=>`<span class="rtag have">✓${t}</span>`).join('')}${(r.ingredients_need||[]).map(t=>`<span class="rtag need">+${t}</span>`).join('')}</div><div class="rsteps" id="rs-${i}">${(r.steps||[]).map((s,j)=>`<div class="rstep" data-n="${j+1}">${s}</div>`).join('')}</div></div>`).join('');
+}
+function toggleSteps(i){const e=document.getElementById(`rs-${i}`);if(e)e.classList.toggle('show');}
+
+/* ── TAB ── */
+function showTab(tab){
+  ['list','add','recipe','diary'].forEach(t=>document.getElementById(`tab-${t}`).style.display=t===tab?'block':'none');
+  document.querySelectorAll('.nav .btn').forEach((b,i)=>b.classList.toggle('active',['list','add','recipe','diary'][i]===tab));
+  if(tab==='list')renderList();
+  if(tab==='add')renderTemplates();
+  if(tab==='diary')renderCookLog();
+}
+
+/* ── SCENE SWITCH ── */
+function switchScene(s){
+  document.getElementById('scene-fridge').style.display = s==='fridge'?'block':'none';
+  document.getElementById('scene-pantry').style.display = s==='pantry'?'block':'none';
+  document.getElementById('tab-fridge-btn').classList.toggle('active', s==='fridge');
+  document.getElementById('tab-pantry-btn').classList.toggle('active', s==='pantry');
+}
+
+/* ── COOKING DIARY ── */
+const COOK_KEY='pxfridge_cooklog';
+const loadCookLog=()=>{try{return JSON.parse(localStorage.getItem(COOK_KEY)||'[]');}catch{return[];}};
+const saveCookLog=d=>localStorage.setItem(COOK_KEY,JSON.stringify(d));
+
+let _photoData=null;
+
+async function handlePhoto(input){
+  const file=input.files[0];if(!file)return;
+  const data=await compressImage(file,600,0.75);
+  _photoData=data;
+  const area=document.getElementById('photo-upload-area');
+  area.classList.add('selected');
+  document.getElementById('photo-upload-text').textContent='✓ 已选择照片 · 点击更换';
+}
+
+function compressImage(file,maxW,quality){
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const scale=Math.min(1,maxW/img.width);
+        const canvas=document.createElement('canvas');
+        canvas.width=img.width*scale;canvas.height=img.height*scale;
+        canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function clearPhotoPreview(){
+  _photoData=null;
+  const area=document.getElementById('photo-upload-area');
+  area.classList.remove('selected');
+  document.getElementById('photo-upload-text').textContent='📷 点击选择照片';
+  document.getElementById('photo-file-input').value='';
+}
+
+function addCookLog(){
+  const name=document.getElementById('d-name').value.trim();
+  const date=document.getElementById('d-date').value;
+  const rating=document.getElementById('d-rating').value;
+  const note=document.getElementById('d-note').value.trim();
+  if(!name||!date){alert('请填写菜名和日期');return;}
+  const logs=loadCookLog();
+  logs.unshift({id:Date.now().toString(),name,date,rating:parseInt(rating),note,photo:_photoData||null});
+  saveCookLog(logs);
+  document.getElementById('d-name').value='';
+  document.getElementById('d-note').value='';
+  clearPhotoPreview();
+  renderCookLog();
+}
+
+function delCookLog(id){
+  saveCookLog(loadCookLog().filter(l=>l.id!==id));
+  renderCookLog();
+}
+
+const STARS=['','⭐','⭐⭐','⭐⭐⭐','⭐⭐⭐⭐','⭐⭐⭐⭐⭐'];
+
+function renderCookLog(){
+  const logs=loadCookLog();
+  const el=document.getElementById('cook-log-list');if(!el)return;
+  if(!logs.length){el.innerHTML='<div class="empty">还没有记录<br>做完饭来写一篇吧</div>';return;}
+  // Format date nicely
+  const fmtDate=d=>{const dt=new Date(d);return `${dt.getMonth()+1}月${dt.getDate()}日`;};
+  el.innerHTML=logs.map(l=>`
+    <div class="cook-card">
+      ${l.photo?`<img src="${l.photo}" loading="lazy" style="width:72px;height:72px;object-fit:cover;float:right;margin:0 0 6px 10px;border:2px solid var(--light);flex-shrink:0;">`:''}
+      <div class="cook-card-top">
+        <div class="cook-card-date">📅 ${fmtDate(l.date)}</div>
+        <div class="cook-card-rating">${STARS[l.rating]||''}</div>
+      </div>
+      <div class="cook-card-name">${l.name}</div>
+      ${l.note?`<hr class="cook-card-divider"><div class="cook-card-note">${l.note}</div>`:''}
+      <div class="cook-card-footer">
+        <button class="receipt-btn" onclick="showReceipt('${l.id}')">🧾 生成票根</button>
+        <button class="cook-card-del" onclick="delCookLog('${l.id}')">删除</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ── RECEIPT ── */
+function closeReceipt(){document.getElementById('receipt-modal').style.display='none';}
+
+async function showReceipt(id){
+  const log=loadCookLog().find(l=>l.id===id);
+  if(!log)return;
+  const btn=document.querySelector(`[onclick="showReceipt('${id}')"]`);
+  if(btn){btn.textContent='生成中...';btn.disabled=true;}
+  const dataUrl=await drawReceipt(log);
+  const a=document.createElement('a');
+  a.href=dataUrl;
+  a.download=`fridge-${log.name}-${log.date}.png`;
+  a.click();
+  if(btn){btn.textContent='🧾 生成票根';btn.disabled=false;}
+}
+function closeReceipt(){document.getElementById('receipt-modal')?.remove();}
+
+async function drawReceipt(log){
+  // Load font
+  await document.fonts.load('16px "DotGothic16"');
+
+  const W=360, PAD=28;
+  const STARS_STR=['','★','★★','★★★','★★★★','★★★★★'];
+  const DPR=Math.min(window.devicePixelRatio||2, 2); // max 2x
+
+  // Pre-calculate height
+  let photoH=0;
+  if(log.photo) photoH=200;
+  const noteLines=log.note?wrapText(log.note,W-PAD*2,14):[];
+  const H=120+photoH+(noteLines.length*18)+220;
+
+  const canvas=document.createElement('canvas');
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  const c=canvas.getContext('2d');
+  c.scale(DPR,DPR); // scale all drawing by DPR
+
+  // Paper background
+  c.fillStyle='#faf8f3';
+  c.fillRect(0,0,W,H);
+
+  // Subtle texture lines
+  c.strokeStyle='#f0ece4';c.lineWidth=1;
+  for(let y=0;y<H;y+=6){c.beginPath();c.moveTo(0,y);c.lineTo(W,y);c.stroke();}
+
+  let y=0;
+
+  // ── TOP SERRATED EDGE ──
+  c.fillStyle='var(--bg, #e8f4f0)' in window?getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#e8f4f0':'#e8f4f0';
+  // actually use document bg color
+  const bgColor=getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#e8f4f0';
+  c.fillStyle=bgColor;
+  const zigW=14;
+  c.beginPath();c.moveTo(0,0);
+  for(let x=0;x<=W;x+=zigW){
+    c.lineTo(x,0);c.lineTo(x+zigW/2,10);
+  }
+  c.lineTo(W,0);c.lineTo(W,20);c.lineTo(0,20);c.closePath();c.fill();
+  y=24;
+
+  // ── HEADER ──
+  c.textAlign='center';
+  c.fillStyle='#2a4a3a';
+  c.font='bold 11px "DotGothic16",monospace';
+  c.letterSpacing='4px';
+  c.fillText('★  PIXEL FRIDGE  ★',W/2,y+14);
+  y+=28;
+
+  drawDash(c,PAD,y,W-PAD,'#c0d0c8');y+=14;
+
+  // ── PHOTO ──
+  if(log.photo){
+    await new Promise(res=>{
+      const img=new Image();
+      img.onload=()=>{
+        // draw with rounded feel - just clip
+        c.save();
+        c.drawImage(img,PAD,y,W-PAD*2,photoH);
+        c.restore();
+        res();
+      };
+      img.onerror=res;
+      img.src=log.photo;
+    });
+    y+=photoH+10;
+    drawDash(c,PAD,y,W-PAD,'#c0d0c8');y+=14;
+  }
+
+  // ── DISH NAME ──
+  c.textAlign='center';
+  c.fillStyle='#1a3a2a';
+  c.font='bold 22px "DotGothic16",monospace';
+  c.letterSpacing='2px';
+  c.fillText(log.name,W/2,y+22);
+  y+=36;
+
+  // ── DATE & RATING ──
+  c.font='11px "DotGothic16",monospace';
+  c.fillStyle='#6a8a7a';
+  c.letterSpacing='1px';
+  c.textAlign='left';
+  c.fillText(log.date,PAD,y+12);
+  c.textAlign='right';
+  c.fillStyle='#c8902a';
+  c.fillText(STARS_STR[log.rating]||'',W-PAD,y+12);
+  y+=26;
+
+  drawDash(c,PAD,y,W-PAD,'#c0d0c8');y+=14;
+
+  // ── NOTES ──
+  if(noteLines.length){
+    c.textAlign='left';
+    c.fillStyle='#4a6a5a';
+    c.font='11px "DotGothic16",monospace';
+    c.letterSpacing='0px';
+    noteLines.forEach(line=>{c.fillText(line,PAD,y+13);y+=18;});
+    y+=6;
+    drawDash(c,PAD,y,W-PAD,'#c0d0c8');y+=14;
+  }
+
+  // ── BARCODE-STYLE LINES ──
+  y+=8;
+  drawBarcode(c,PAD,y,W-PAD,24);
+  y+=32;
+
+  // ── FOOTER ──
+  c.textAlign='center';
+  c.fillStyle='#8aaa9a';
+  c.font='9px "DotGothic16",monospace';
+  c.letterSpacing='3px';
+  c.fillText('MADE WITH  ♥  PIXEL FRIDGE',W/2,y+12);
+  y+=24;
+  c.font='8px "DotGothic16",monospace';
+  c.letterSpacing='1px';
+  c.fillStyle='#aac0b4';
+  c.fillText(new Date().toLocaleDateString('zh-CN'),W/2,y+10);
+  y+=20;
+
+  // ── BOTTOM SERRATED ──
+  c.fillStyle=bgColor;
+  c.beginPath();c.moveTo(0,H);
+  for(let x=0;x<=W;x+=zigW){
+    c.lineTo(x,H);c.lineTo(x+zigW/2,H-10);
+  }
+  c.lineTo(W,H);c.closePath();c.fill();
+
+  return canvas.toDataURL('image/png');
+}
+
+function drawDash(c,x1,y,x2,color){
+  c.strokeStyle=color;c.lineWidth=1;c.setLineDash([4,4]);
+  c.beginPath();c.moveTo(x1,y);c.lineTo(x2,y);c.stroke();
+  c.setLineDash([]);
+}
+
+function drawBarcode(c,x,y,w,h){
+  const bars=[3,1,2,1,4,1,2,3,1,2,1,3,2,1,4,1,2,1,3,1,2,1,4,2,1,3];
+  let cx=x;const total=bars.reduce((a,b)=>a+b,0);const scale=(w-x)/(total);
+  bars.forEach((b,i)=>{
+    if(i%2===0){c.fillStyle=i%4===0?'#2a4a3a':'#4a6a5a';}
+    else{c.fillStyle='transparent';}
+    if(i%2===0) c.fillRect(cx,y,b*scale,h);
+    cx+=b*scale;
+  });
+}
+
+function wrapText(text,maxW,fontSize){
+  // Simple char-based wrap
+  const charsPerLine=Math.floor(maxW/(fontSize*0.65));
+  const lines=[];
+  for(let i=0;i<text.length;i+=charsPerLine) lines.push(text.slice(i,i+charsPerLine));
+  return lines;
+}
+
+/* ── INIT ── */
+document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+buildSwatches();renderList();renderShelves();renderTemplates();
+document.getElementById('d-date').value=new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
