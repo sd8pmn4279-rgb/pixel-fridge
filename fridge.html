@@ -672,6 +672,20 @@ function confirmDel(reason){
   document.getElementById('del-modal').style.display='none';
   renderList();renderShelves();
 }
+function delLog(idx){
+  const log=loadLog();
+  log.splice(idx,1);
+  saveLog(log);
+  renderLog();
+  // re-render list if visible
+  if(document.getElementById('tab-list').style.display!=='none') renderList();
+}
+function clearLog(){
+  if(!confirm('确定清空所有记录吗？')) return;
+  localStorage.removeItem(LOG_KEY);
+  renderLog();
+  if(document.getElementById('tab-list').style.display!=='none') renderList();
+}
 function cancelDel(){
   _pendingDelId=null;
   document.getElementById('del-modal').style.display='none';
@@ -680,10 +694,13 @@ function renderLog(){
   const log=loadLog().reverse().slice(0,10);
   const el=document.getElementById('list-log');if(!el)return;
   if(!log.length){el.innerHTML='<div class="empty">暂无记录</div>';return;}
-  el.innerHTML=log.map(l=>`<div class="log-row">
+  el.innerHTML=`<div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+    <button onclick="clearLog()" style="padding:2px 8px;border:1px solid var(--light);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:8px;">清空记录</button>
+  </div>`+log.map((l,i)=>`<div class="log-row">
     <div class="log-icon">${l.reason==='eaten'?'✓':'🗑'}</div>
     <div class="log-name">${l.name}</div>
     <div class="log-date">${l.reason==='eaten'?'吃完了':'扔掉了'} · ${l.date}</div>
+    <button onclick="delLog(${i})" style="padding:1px 5px;border:1px solid var(--light);background:transparent;color:var(--muted);cursor:pointer;font-family:inherit;font-size:8px;flex-shrink:0;">✕</button>
   </div>`).join('');
 }
 
