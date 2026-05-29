@@ -45,7 +45,32 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 
 /* ── FRIDGE ── */
 .fridge-scene{display:flex;justify-content:center;margin:0 auto 16px;perspective:900px;}
-.fridge-outer{width:220px;border:3px solid var(--fd-dark);background:var(--fd-bg);box-shadow:6px 6px 0 var(--shadow);position:relative;}
+.fridge-3d{position:relative;display:inline-block;margin-right:14px;margin-top:10px;}
+.fridge-outer{width:220px;border:3px solid var(--fd-dark);background:var(--fd-bg);position:relative;box-shadow:none;}
+/* Right side face */
+.fridge-3d::after{
+  content:'';position:absolute;
+  right:-14px;top:10px;
+  width:14px;height:100%;
+  background:var(--fd-dark);
+  border-top:3px solid var(--fd-dark);
+  border-right:3px solid rgba(0,0,0,0.25);
+  border-bottom:3px solid rgba(0,0,0,0.25);
+  clip-path:polygon(0 0,100% 0,100% 100%,0 100%);
+  box-sizing:border-box;
+}
+/* Top face */
+.fridge-3d::before{
+  content:'';position:absolute;
+  top:-10px;left:14px;
+  width:220px;height:10px;
+  background:linear-gradient(to bottom right,rgba(255,255,255,0.5),rgba(255,255,255,0.1));
+  background-color:var(--fd-bg);
+  border-top:3px solid var(--fd-dark);
+  border-right:3px solid var(--fd-dark);
+  border-left:none;
+  box-sizing:border-box;
+}
 .fridge-interior-top{background:var(--interior);padding:6px;height:220px;border-bottom:3px solid var(--fd-dark);position:relative;overflow:hidden;}
 .fridge-interior-top::before{content:'';position:absolute;top:0;left:0;right:0;height:16px;background:linear-gradient(to bottom,rgba(255,255,240,0.6),transparent);pointer-events:none;z-index:1;}
 .fridge-interior-btm{background:var(--freeze-int);padding:5px 6px;height:85px;}
@@ -101,8 +126,9 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .status-pill.expire{border-color:var(--expire);color:var(--expire);}
 
 /* ── NAV ── */
-.nav{display:flex;gap:6px;margin-bottom:10px;}
-.btn{padding:7px 12px;border:2px solid var(--border);background:var(--cream);color:#4a6a5a;cursor:pointer;font-size:10px;font-family:inherit;box-shadow:2px 2px 0 var(--shadow);transition:all .15s;}
+.nav{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+.nav::-webkit-scrollbar{display:none;}
+.btn{padding:7px 12px;border:2px solid var(--border);background:var(--cream);color:#4a6a5a;cursor:pointer;font-size:10px;font-family:inherit;box-shadow:2px 2px 0 var(--shadow);transition:all .15s;white-space:nowrap;flex-shrink:0;}
 .btn:hover{transform:translateY(-1px);}
 .btn.active{background:var(--accent);color:var(--cream);box-shadow:3px 3px 0 #2a6a4a;}
 
@@ -152,6 +178,34 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 .empty{text-align:center;padding:18px;color:#9ab4ac;font-size:10px;line-height:1.8;}
 .ld::after{content:'';animation:dots 1.2s infinite;}
 @keyframes dots{0%{content:'';}33%{content:'.';}66%{content:'..';}100%{content:'...';};}
+/* warn modal */
+.warn-modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;}
+.warn-modal-box{background:var(--card);border:2px solid var(--border);padding:20px;box-shadow:6px 6px 0 var(--shadow);width:270px;}
+.warn-modal-title{font-size:13px;color:var(--text);margin-bottom:8px;}
+.warn-modal-body{font-size:10px;color:var(--muted);line-height:1.8;margin-bottom:14px;}
+.warn-modal-btns{display:flex;gap:8px;}
+.warn-modal-btn{flex:1;padding:8px;border:2px solid var(--border);background:var(--cream);font-family:inherit;font-size:10px;cursor:pointer;text-align:center;}
+.warn-modal-btn.go{background:var(--accent);color:var(--cream);border-color:var(--accent);}
+/* sticker reward */
+.sticker-reward{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.sticker-reward-box{background:var(--card);border:3px solid var(--accent);padding:24px 30px;box-shadow:8px 8px 0 var(--shadow);text-align:center;}
+.sticker-reward-title{font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:8px;}
+.sticker-reward-name{font-size:14px;color:var(--accent);margin-top:10px;margin-bottom:4px;}
+.sticker-reward-sub{font-size:8px;color:var(--muted);margin-bottom:14px;}
+.sticker-reward-btn{padding:7px 20px;border:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-family:inherit;font-size:10px;}
+/* sticker collection scene */
+.sticker-box{width:220px;background:var(--card);border:3px solid var(--border);box-shadow:6px 6px 0 var(--shadow);padding:10px;}
+.sticker-box-title{font-size:7px;letter-spacing:3px;color:var(--muted);text-align:center;margin-bottom:10px;background:var(--border);color:var(--cream);padding:3px;}
+.sticker-grid{display:flex;flex-wrap:wrap;gap:8px;min-height:60px;}
+.sticker-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:grab;position:relative;user-select:none;-webkit-user-select:none;}
+.sticker-item-name{font-size:6px;color:var(--muted);text-align:center;}
+.sticker-item-cnt{position:absolute;top:-4px;right:-4px;background:var(--accent);color:var(--cream);font-size:6px;width:12px;height:12px;display:flex;align-items:center;justify-content:center;}
+.sticker-item.dragging{opacity:.4;}
+.sticker-drag-ghost{position:fixed;z-index:9999;pointer-events:none;opacity:.85;transition:none;}
+.sticker-on-fridge{position:absolute;cursor:pointer;z-index:15;transition:transform .15s;}
+.sticker-on-fridge:active{transform:scale(0.8);}
+.sticker-hint{font-size:8px;color:var(--muted);letter-spacing:1px;text-align:center;margin-bottom:8px;font-style:italic;}
+.sticker-empty{font-size:9px;color:var(--muted);text-align:center;padding:16px;width:100%;}
 .footer{text-align:center;
 /* cooking log */
 .cook-form{margin-bottom:12px;}
@@ -311,6 +365,7 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
   <button class="btn" onclick="showTab('add')">＋ 添加</button>
   <button class="btn" onclick="showTab('recipe')">🍳 做什么菜</button>
   <button class="btn" onclick="showTab('diary')">📷 日记</button>
+  <button class="btn" onclick="showTab('stickers')">🎀 冰箱贴</button>
 </div>
 
 <div id="tab-list">
@@ -413,6 +468,36 @@ body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(
 <!-- receipt saves directly via download -->
 
 <div id="label-popup"></div>
+
+<!-- Receipt warning modal -->
+<div class="warn-modal" id="receipt-warn-modal" style="display:none">
+  <div class="warn-modal-box">
+    <div class="warn-modal-title">🧾 生成票根</div>
+    <div class="warn-modal-body">生成票根后这条日记将无法删除。<br>确定要继续吗？<br><br>🎀 生成后会获得一枚随机像素冰箱贴！</div>
+    <div class="warn-modal-btns">
+      <div class="warn-modal-btn go" onclick="confirmReceipt()">确定，生成</div>
+      <div class="warn-modal-btn" onclick="document.getElementById('receipt-warn-modal').style.display='none'">取消</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sticker reward modal -->
+<div class="sticker-reward" id="sticker-reward" style="display:none" onclick="closeStickerReward()">
+  <div class="sticker-reward-box" onclick="event.stopPropagation()">
+    <div class="sticker-reward-title">✦ 获得冰箱贴 ✦</div>
+    <div id="sticker-reward-art" style="display:flex;justify-content:center;margin:8px 0"></div>
+    <div class="sticker-reward-name" id="sticker-reward-name"></div>
+    <div class="sticker-reward-sub">已加入冰箱贴收藏</div>
+    <button class="sticker-reward-btn" onclick="closeStickerReward()">太好了！</button>
+  </div>
+</div>
+<div id="tab-stickers" style="display:none">
+  <div class="section">
+    <div class="sec-title">冰箱贴收藏 STICKER COLLECTION</div>
+    <div class="sticker-grid" id="sticker-grid"></div>
+  </div>
+</div>
+
 <div class="footer">PIXEL FRIDGE · 像素冰箱</div>
 
 <!-- Edit qty modal -->
@@ -472,7 +557,7 @@ function buildSwatches(){
 function toggleColors(){const p=document.getElementById('color-panel');p.style.display=p.style.display==='none'?'block':'none';}
 
 /* ── PIXEL ART ── */
-const SZ=3;
+const SZ=2;
 function mkSvg(grid,pal){
   const h=grid.length,w=grid[0].length;
   let r='';
@@ -492,17 +577,17 @@ const W='#f0ede0',S='#d4caaa',Y='#ffc820',y='#e0a000',
       Bx='#c89040',bx='#906020',BW='#f0d890';
 
 const PIXEL={
-  egg:()=>mkSvg([[0,0,0,W,W,W,W,0,0,0],[0,0,W,W,W,W,W,W,0,0],[0,W,W,S,W,W,S,W,W,0],[W,W,W,W,W,W,W,W,W,W],[W,W,W,Y,Y,Y,W,W,W,W],[W,W,Y,Y,y,Y,Y,W,W,W],[W,W,W,Y,Y,Y,W,W,W,W],[0,W,W,W,W,W,W,W,W,0],[0,0,W,W,W,W,W,W,0,0],[0,0,0,S,S,S,S,0,0,0]],{[W]:W,[S]:S,[Y]:Y,[y]:y}),
-  milk:()=>mkSvg([[0,0,M,M,M,M,M,M,0,0],[0,M,b,b,B,B,b,b,M,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,B,B,B,B,B,B,B,B,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,M,M,M,M,M,M,M,M,0],[0,0,b,b,b,b,b,b,0,0]],{[M]:M,[B]:B,[b]:b}),
-  veg:()=>mkSvg([[0,0,0,G,g,G,0,0,0,0],[0,0,G,G,g,G,G,0,0,0],[0,G,G,G,G,G,G,G,0,0],[G,G,g,G,G,G,g,G,G,0],[G,G,G,G,G,G,G,G,G,0],[0,G,G,G,G,G,G,G,0,0],[0,0,g,G,g,G,g,0,0,0],[0,0,0,gs,gs,gs,0,0,0,0],[0,0,gs,gs,0,gs,gs,0,0,0],[0,0,0,0,0,0,0,0,0,0]],{[G]:G,[g]:g,[gs]:gs}),
-  meat:()=>mkSvg([[0,0,0,0,0,gs,gs,0,0,0],[0,0,0,0,gs,gs,gs,gs,0,0],[0,0,R,R,R,R,R,0,0,0],[0,R,R,r2,R,R,r2,R,R,0],[R,R,r2,rw,rw,r2,R,R,R,0],[R,R,R,rw,R,R,R,R,R,0],[0,R,R,R,R,R,R,R,0,0],[0,0,R,R,R,R,R,0,0,0],[0,0,0,r2,r2,r2,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]],{[R]:R,[r2]:r2,[rw]:rw,[gs]:gs}),
-  fish:()=>mkSvg([[0,0,0,0,0,0,F,0,F,0],[0,0,0,0,0,F,F,F,F,F],[0,F,F,F,F,F,F,F,F,0],[F,F,F,ff,F,F,fw,F,F,0],[F,F,F,F,F,F,F,F,F,F],[F,F,F,F,F,F,F,F,F,0],[0,F,F,F,F,F,F,F,F,0],[0,0,0,0,0,F,F,F,F,F],[0,0,0,0,0,0,F,0,F,0],[0,0,0,0,0,0,0,0,0,0]],{[F]:F,[ff]:ff,[fw]:fw}),
-  fruit:()=>mkSvg([[0,0,0,0,Al,0,0,0,0,0],[0,0,0,Al,Al,Al,0,0,0,0],[0,0,A,A,A,A,A,0,0,0],[0,A,A,aa,A,A,A,A,0,0],[A,A,A,A,A,A,A,A,A,0],[A,A,A,A,A,A,A,A,A,0],[A,A,A,A,A,A,A,A,A,0],[0,A,A,A,A,A,A,A,0,0],[0,0,A,A,A,A,A,0,0,0],[0,0,0,aa,aa,aa,0,0,0,0]],{[A]:A,[aa]:aa,[Al]:Al}),
-  tofu:()=>mkSvg([[0,0,0,0,0,0,0,0,0,0],[0,T,T,T,T,T,T,T,T,0],[T,T,tt,T,T,T,tt,T,T,T],[T,T,T,T,T,T,T,T,T,T],[T,T,tt,T,T,T,tt,T,T,T],[T,T,T,T,T,T,T,T,T,T],[T,T,tt,T,T,T,tt,T,T,T],[T,T,T,T,T,T,T,T,T,T],[0,T,T,T,T,T,T,T,T,0],[0,0,tt,tt,tt,tt,tt,tt,0,0]],{[T]:T,[tt]:tt}),
-  drink:()=>mkSvg([[0,0,D,D,D,D,D,D,0,0],[0,0,D,Dw,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,Dw,Dw,Dw,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,D,Dw,D,D,D,D,0,0],[0,0,D,D,D,D,D,D,0,0],[0,0,0,D,D,D,D,0,0,0]],{[D]:D,[Dw]:Dw}),
-  condiment:()=>mkSvg([[0,0,0,Cs,Cs,Cs,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,0,0,0],[0,0,0,Cb,Cb,Cb,0,0,0,0],[0,Cb,Cb,Cb,Cb,Cb,Cb,Cb,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,Cb,Cb,Cb,Cb,Cb,Cb,Cb,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0],[0,0,Cb,Cb,Cb,Cb,Cb,0,0,0]],{[Cs]:Cs,[Cb]:Cb}),
-  seafood:()=>mkSvg([[0,0,0,0,H,H,0,0,0,0],[0,0,0,H,H,H,H,0,0,0],[0,0,H,H,H,H,H,H,0,0],[0,H,H,Hd,H,H,H,H,H,0],[H,H,H,H,H,H,H,H,H,H],[H,H,H,H,H,H,H,H,H,0],[0,H,H,H,H,H,H,H,0,0],[0,0,H,H,H,H,H,0,0,0],[0,0,0,H,H,H,0,0,0,0],[0,0,0,0,0,0,0,0,0,0]],{[H]:H,[Hd]:Hd}),
-  box:()=>mkSvg([[0,0,0,0,0,0,0,0,0,0],[0,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[Bx,BW,bx,BW,BW,BW,bx,BW,BW,Bx],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[Bx,BW,bx,BW,BW,BW,bx,BW,BW,Bx],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,Bx],[0,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,0],[0,0,bx,bx,bx,bx,bx,bx,0,0]],{[Bx]:Bx,[bx]:bx,[BW]:BW}),
+  egg:()=>mkSvg([[0,0,0,0,W,W,W,W,W,W,0,0,0,0,0,0],[0,0,0,W,W,W,W,W,W,W,W,0,0,0,0,0],[0,0,W,W,W,W,W,W,W,W,W,W,0,0,0,0],[0,W,W,W,S,W,W,W,W,S,W,W,W,0,0,0],[0,W,W,W,W,W,W,W,W,W,W,W,W,0,0,0],[W,W,W,W,W,W,W,W,W,W,W,W,W,W,0,0],[W,W,W,W,W,W,W,W,W,W,W,W,W,W,0,0],[W,W,W,W,Y,Y,Y,Y,W,W,W,W,W,W,0,0],[W,W,W,Y,Y,y,y,Y,Y,W,W,W,W,W,0,0],[W,W,W,W,Y,Y,Y,Y,W,W,W,W,W,W,0,0],[W,W,W,W,W,W,W,W,W,W,W,W,W,W,0,0],[0,W,W,W,W,W,W,W,W,W,W,W,W,0,0,0],[0,W,W,W,W,W,W,W,W,W,W,W,W,0,0,0],[0,0,W,W,W,W,W,W,W,W,W,W,0,0,0,0],[0,0,0,S,S,S,S,S,S,S,S,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[W]:W,[S]:S,[Y]:Y,[y]:y}),
+  milk:()=>mkSvg([[0,0,0,M,M,M,M,M,M,M,M,0,0,0,0,0],[0,0,M,b,b,b,B,B,b,b,b,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,B,B,B,B,B,B,B,B,B,B,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,Dw,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,Dw,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,M,M,M,M,M,M,M,M,M,M,0,0,0,0],[0,0,0,M,M,M,M,M,M,M,M,0,0,0,0,0],[0,0,0,0,b,b,b,b,b,b,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[M]:M,[B]:B,[b]:b,[Dw]:Dw}),
+  veg:()=>mkSvg([[0,0,0,0,0,G,g,G,0,0,0,0,0,0,0,0],[0,0,0,0,G,G,g,G,G,0,0,0,0,0,0,0],[0,0,0,G,G,G,G,G,G,G,0,0,0,0,0,0],[0,0,G,G,g,G,G,G,g,G,G,0,0,0,0,0],[0,G,G,G,G,G,G,G,G,G,G,G,0,0,0,0],[0,G,G,G,G,G,G,G,G,G,G,G,0,0,0,0],[0,0,G,G,G,G,G,G,G,G,G,0,0,0,0,0],[0,0,0,G,G,G,G,G,G,G,0,0,0,0,0,0],[0,0,0,0,g,G,g,G,g,0,0,0,0,0,0,0],[0,0,0,0,0,gs,gs,gs,0,0,0,0,0,0,0,0],[0,0,0,0,gs,gs,0,gs,gs,0,0,0,0,0,0,0],[0,0,0,gs,gs,0,0,0,gs,gs,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[G]:G,[g]:g,[gs]:gs}),
+  meat:()=>mkSvg([[0,0,0,0,0,0,gs,gs,gs,0,0,0,0,0,0,0],[0,0,0,0,0,gs,gs,gs,gs,gs,0,0,0,0,0,0],[0,0,0,0,gs,gs,0,0,gs,gs,0,0,0,0,0,0],[0,0,0,R,R,R,R,R,R,R,0,0,0,0,0,0],[0,0,R,R,R,r2,R,R,r2,R,R,R,0,0,0,0],[0,R,R,R,r2,rw,rw,rw,r2,R,R,R,R,0,0,0],[R,R,R,r2,rw,rw,rw,rw,rw,r2,R,R,R,R,0,0],[R,R,R,R,r2,rw,rw,rw,r2,R,R,R,R,R,0,0],[R,R,R,R,R,R,R,R,R,R,R,R,R,R,0,0],[0,R,R,R,R,R,R,R,R,R,R,R,R,0,0,0],[0,0,R,R,R,R,R,R,R,R,R,R,0,0,0,0],[0,0,0,0,r2,r2,r2,r2,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[R]:R,[r2]:r2,[rw]:rw,[gs]:gs}),
+  fish:()=>mkSvg([[0,0,0,0,0,0,0,0,F,0,F,F,0,0,0,0],[0,0,0,0,0,0,0,F,F,F,F,F,F,0,0,0],[0,0,F,F,F,F,F,F,F,F,F,F,F,0,0,0],[0,F,F,F,F,F,F,F,F,F,F,F,F,F,0,0],[F,F,F,F,ff,F,F,F,fw,F,F,F,F,F,F,0],[F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F],[F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F],[F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,0],[0,F,F,F,F,F,F,F,F,F,F,F,F,F,0,0],[0,0,F,F,F,F,F,F,F,F,F,F,F,0,0,0],[0,0,0,0,0,0,0,F,F,F,F,F,F,0,0,0],[0,0,0,0,0,0,0,0,F,F,0,F,F,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[F]:F,[ff]:ff,[fw]:fw}),
+  fruit:()=>mkSvg([[0,0,0,0,0,Al,Al,0,0,0,0,0,0,0,0,0],[0,0,0,0,Al,Al,Al,Al,0,0,0,0,0,0,0,0],[0,0,0,A,A,A,A,A,A,A,0,0,0,0,0,0],[0,0,A,A,A,aa,A,A,A,A,A,0,0,0,0,0],[0,A,A,A,A,A,A,A,A,A,A,A,0,0,0,0],[A,A,A,A,A,A,A,A,A,A,A,A,A,0,0,0],[A,A,A,A,A,A,A,A,A,A,A,A,A,0,0,0],[A,A,A,A,A,A,A,A,A,A,A,A,A,0,0,0],[A,A,A,A,A,A,A,A,A,A,A,A,A,0,0,0],[0,A,A,A,A,A,A,A,A,A,A,A,0,0,0,0],[0,0,A,A,A,A,A,A,A,A,A,0,0,0,0,0],[0,0,0,A,A,A,A,A,A,A,0,0,0,0,0,0],[0,0,0,0,aa,aa,aa,aa,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[A]:A,[aa]:aa,[Al]:Al}),
+  tofu:()=>mkSvg([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,T,T,T,T,T,T,T,T,T,T,0,0,0,0],[0,T,T,T,T,T,T,T,T,T,T,T,T,0,0,0],[T,T,T,tt,T,T,T,T,T,tt,T,T,T,T,0,0],[T,T,T,T,T,T,T,T,T,T,T,T,T,T,0,0],[T,T,T,tt,T,T,T,T,T,tt,T,T,T,T,0,0],[T,T,T,T,T,T,T,T,T,T,T,T,T,T,0,0],[T,T,T,tt,T,T,T,T,T,tt,T,T,T,T,0,0],[T,T,T,T,T,T,T,T,T,T,T,T,T,T,0,0],[T,T,T,tt,T,T,T,T,T,tt,T,T,T,T,0,0],[T,T,T,T,T,T,T,T,T,T,T,T,T,T,0,0],[0,T,T,T,T,T,T,T,T,T,T,T,T,0,0,0],[0,0,T,T,T,T,T,T,T,T,T,T,0,0,0,0],[0,0,0,tt,tt,tt,tt,tt,tt,tt,tt,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[T]:T,[tt]:tt}),
+  drink:()=>mkSvg([[0,0,0,D,D,D,D,D,D,D,D,0,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,Dw,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,Dw,Dw,Dw,Dw,D,D,D,D,D,0,0,0,0],[0,0,D,Dw,Dw,Dw,Dw,D,D,D,D,D,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,Dw,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,D,D,D,D,D,D,D,D,D,D,0,0,0,0],[0,0,0,D,D,D,D,D,D,D,D,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[D]:D,[Dw]:Dw}),
+  condiment:()=>mkSvg([[0,0,0,0,Cs,Cs,Cs,Cs,0,0,0,0,0,0,0,0],[0,0,0,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0,0],[0,0,0,0,Cb,Cb,Cb,Cb,0,0,0,0,0,0,0,0],[0,0,Cb,Cb,Cb,Cb,Cb,Cb,Cb,Cb,0,0,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0],[0,0,Cb,Cb,Cb,Cb,Cb,Cb,Cb,Cb,0,0,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0],[0,0,Cs,Cb,Cs,Cs,Cs,Cs,Cb,Cs,0,0,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0],[0,0,Cs,Cs,Cs,Cs,Cs,Cs,Cs,Cs,0,0,0,0,0,0],[0,0,0,Cb,Cb,Cb,Cb,Cb,Cb,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[Cs]:Cs,[Cb]:Cb}),
+  seafood:()=>mkSvg([[0,0,0,0,0,H,H,H,0,0,0,0,0,0,0,0],[0,0,0,0,H,H,H,H,H,0,0,0,0,0,0,0],[0,0,0,H,H,H,H,H,H,H,0,0,0,0,0,0],[0,0,H,H,H,Hd,H,H,H,H,H,0,0,0,0,0],[0,H,H,H,H,H,H,H,H,H,H,H,0,0,0,0],[H,H,H,H,H,H,H,H,H,H,H,H,H,0,0,0],[H,H,H,H,H,H,H,H,H,H,H,H,H,0,0,0],[0,H,H,H,H,H,H,H,H,H,H,H,0,0,0,0],[0,0,H,H,H,H,H,H,H,H,H,0,0,0,0,0],[0,0,0,H,H,H,H,H,H,H,0,0,0,0,0,0],[0,0,0,0,H,H,H,H,H,0,0,0,0,0,0,0],[0,0,0,0,0,H,H,H,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[H]:H,[Hd]:Hd}),
+  box:()=>mkSvg([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,0,0,0,0],[0,Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0,0],[Bx,BW,BW,bx,BW,BW,BW,BW,BW,bx,BW,BW,BW,Bx,0,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0],[Bx,BW,BW,bx,BW,BW,BW,BW,BW,bx,BW,BW,BW,Bx,0,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0],[Bx,BW,BW,bx,BW,BW,BW,BW,BW,bx,BW,BW,BW,Bx,0,0],[Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0],[0,Bx,BW,BW,BW,BW,BW,BW,BW,BW,BW,BW,Bx,0,0,0],[0,0,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,Bx,0,0,0,0],[0,0,0,bx,bx,bx,bx,bx,bx,bx,bx,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{[Bx]:Bx,[bx]:bx,[BW]:BW}),
 };
 
 // Generate a stable hue from food name (0-359)
@@ -560,6 +645,17 @@ function toggleDoor(w){
   doorState[w]=!doorState[w];
   document.getElementById(`door-${w}`).classList.toggle('open',doorState[w]);
   if(doorState[w]) renderShelves();
+  const anyOpen=doorState.top||doorState.btm;
+  if(anyOpen){
+    // opening: hide stickers immediately
+    document.querySelectorAll('.sticker-on-fridge').forEach(el=>el.style.display='none');
+  } else {
+    // closing: show stickers after door animation ends (0.75s)
+    setTimeout(()=>{
+      if(!doorState.top&&!doorState.btm)
+        document.querySelectorAll('.sticker-on-fridge').forEach(el=>el.style.display='block');
+    }, 750);
+  }
 }
 
 /* ── SHELVES ── */
@@ -920,11 +1016,12 @@ function toggleSteps(i){const e=document.getElementById(`rs-${i}`);if(e)e.classL
 
 /* ── TAB ── */
 function showTab(tab){
-  ['list','add','recipe','diary'].forEach(t=>document.getElementById(`tab-${t}`).style.display=t===tab?'block':'none');
-  document.querySelectorAll('.nav .btn').forEach((b,i)=>b.classList.toggle('active',['list','add','recipe','diary'][i]===tab));
+  ['list','add','recipe','diary','stickers'].forEach(t=>document.getElementById(`tab-${t}`).style.display=t===tab?'block':'none');
+  document.querySelectorAll('.nav .btn').forEach((b,i)=>b.classList.toggle('active',['list','add','recipe','diary','stickers'][i]===tab));
   if(tab==='list')renderList();
   if(tab==='add')renderTemplates();
   if(tab==='diary')renderCookLog();
+  if(tab==='stickers')renderStickerGrid();
 }
 
 /* ── LABEL TOGGLE ── */
@@ -951,6 +1048,316 @@ function toggleLabel(el){
   // auto hide
   clearTimeout(popup._t);
   popup._t = setTimeout(()=>{ popup.style.display='none'; popup._src=null; }, 2000);
+}
+
+/* ── STICKERS ── */
+const STICKER_KEY='pxfridge_stickers';
+const loadStickers=()=>{try{return JSON.parse(localStorage.getItem(STICKER_KEY)||'[]');}catch{return[];}};
+const saveStickers=d=>localStorage.setItem(STICKER_KEY,JSON.stringify(d));
+
+// Each sticker uses local vars to avoid conflicts with main pixel art constants
+const STICKER_DEFS=[
+  {id:'watermelon',name:'西瓜贴',rarity:'普通',art:()=>{
+    const[_r,_g,_w,_d]=['r','g','w','d'];
+    return mkStickerSvg([[0,0,0,_r,_r,_r,_r,_r,_r,_r,0,0],[0,0,_r,_r,_g,_r,_r,_g,_r,_r,_r,0],[0,_r,_r,_w,_w,_w,_w,_w,_w,_w,_r,0],[_r,_r,_w,_w,_d,_w,_d,_w,_d,_w,_r,_r],[_r,_w,_w,_w,_w,_w,_w,_w,_w,_w,_w,_r],[_r,_w,_w,_w,_w,_w,_w,_w,_w,_w,_w,_r],[0,_r,_w,_w,_w,_w,_w,_w,_w,_w,_r,0],[0,0,_r,_r,_r,_r,_r,_r,_r,_r,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],{r:'#e04040',g:'#a01818',w:'#f0f0e0',d:'#303030'});}},
+  {id:'star',name:'星星贴',rarity:'稀有',art:()=>{
+    const _y='y';
+    return mkStickerSvg([[0,0,0,0,_y,0,0,0,0,0,0,0],[0,0,0,_y,_y,_y,0,0,0,0,0,0],[_y,_y,_y,_y,_y,_y,_y,_y,_y,_y,_y,0],[0,_y,_y,_y,_y,_y,_y,_y,_y,_y,0,0],[0,0,_y,_y,_y,_y,_y,_y,_y,0,0,0],[0,_y,_y,_y,0,0,_y,_y,_y,_y,0,0],[_y,_y,_y,0,0,0,0,_y,_y,_y,_y,0],[0,0,0,0,0,0,0,0,0,0,0,0]],{y:'#ffd040'});}},
+  {id:'icecream',name:'冰淇淋贴',rarity:'普通',art:()=>{
+    const[_c,_p,_t]=['c','p','t'];
+    return mkStickerSvg([[0,0,_c,_c,_c,_c,_c,_c,0,0,0,0],[0,_c,_c,_p,_c,_c,_p,_c,_c,0,0,0],[0,_c,_c,_c,_c,_c,_c,_c,_c,0,0,0],[0,0,_c,_c,_c,_c,_c,_c,0,0,0,0],[0,0,0,_t,_t,_t,_t,0,0,0,0,0],[0,0,0,_t,_t,_t,_t,0,0,0,0,0],[0,0,0,0,_t,_t,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],{c:'#f8e0d0',p:'#f0a0a0',t:'#d4a060'});}},
+  {id:'rainbow',name:'彩虹贴',rarity:'稀有',art:()=>{
+    const[_r,_o,_y,_g,_b,_w]=['r','o','y','g','b','w'];
+    return mkStickerSvg([[0,0,0,0,_r,_r,_r,_r,0,0,0,0],[0,0,_r,_r,_o,_o,_o,_o,_r,_r,0,0],[0,_r,_r,_o,_y,_y,_y,_y,_o,_r,_r,0],[_r,_r,_o,_y,_g,_g,_g,_y,_o,_r,_r,0],[_r,_o,_y,_g,_b,_b,_g,_y,_o,_r,0,0],[0,0,0,0,_w,_w,0,0,0,0,0,0],[0,0,0,_w,_w,_w,_w,0,0,0,0,0]],{r:'#e04040',o:'#f08020',y:'#ffd040',g:'#40a840',b:'#4080e0',w:'#f0f0f0'});}},
+  {id:'cat',name:'猫咪贴',rarity:'普通',art:()=>{
+    const[_c,_e,_n]=['c','e','n'];
+    return mkStickerSvg([[_c,0,0,0,0,0,0,0,_c,0,0,0],[_c,_c,0,0,0,0,0,_c,_c,0,0,0],[0,_c,_c,_c,_c,_c,_c,_c,0,0,0,0],[0,_c,_e,_c,_c,_c,_e,_c,0,0,0,0],[0,_c,_c,_c,_c,_c,_c,_c,0,0,0,0],[0,_c,_n,_c,_c,_c,_n,_c,0,0,0,0],[0,0,_c,_c,_c,_c,_c,0,0,0,0,0],[0,0,0,_c,_c,_c,0,0,0,0,0,0]],{c:'#f0d8c0',e:'#3a60a0',n:'#e07070'});}},
+  {id:'mushroom',name:'蘑菇贴',rarity:'稀有',art:()=>{
+    const[_r,_w,_t]=['r','w','t'];
+    return mkStickerSvg([[0,0,0,_r,_r,_r,_r,_r,0,0,0,0],[0,0,_r,_r,_w,_r,_w,_r,_r,0,0,0],[0,_r,_r,_r,_r,_r,_r,_r,_r,_r,0,0],[0,_r,_r,_r,_r,_r,_r,_r,_r,_r,0,0],[0,0,_r,_r,_r,_r,_r,_r,_r,0,0,0],[0,0,_t,_t,_t,_t,_t,_t,0,0,0,0],[0,0,_t,_t,_t,_t,_t,_t,0,0,0,0],[0,0,0,_t,_t,_t,_t,0,0,0,0,0]],{r:'#e04040',w:'#f0f0f0',t:'#f0d890'});}},
+  {id:'flower',name:'小花贴',rarity:'普通',art:()=>{
+    const[_p,_y]=['p','y'];
+    return mkStickerSvg([[0,0,_p,0,0,0,_p,0,0,0,0,0],[0,_p,_p,_p,0,_p,_p,_p,0,0,0,0],[0,_p,_p,_p,_y,_p,_p,_p,0,0,0,0],[0,0,_p,0,_y,_y,0,_p,0,0,0,0],[0,0,0,0,_y,_y,0,0,0,0,0,0],[0,0,0,_p,_y,_p,0,0,0,0,0,0],[0,0,_p,_p,_p,_p,_p,0,0,0,0,0],[0,0,0,_p,_p,_p,0,0,0,0,0,0]],{p:'#f060a0',y:'#ffd040'});}},
+  {id:'diamond',name:'钻石贴',rarity:'超稀有',art:()=>{
+    const[_d,_dl]=['d','dl'];
+    return mkStickerSvg([[0,0,0,_d,_d,_d,_d,0,0,0,0,0],[0,0,_d,_dl,_dl,_dl,_d,_d,0,0,0,0],[0,_d,_d,_dl,_dl,_d,_d,_d,_d,0,0,0],[_d,_d,_d,_d,_d,_d,_d,_d,_d,_d,0,0],[0,_d,_d,_d,_d,_d,_d,_d,_d,0,0,0],[0,0,_d,_d,_d,_d,_d,_d,0,0,0,0],[0,0,0,_d,_d,_d,_d,0,0,0,0,0],[0,0,0,0,_d,_d,0,0,0,0,0,0]],{d:'#80d0f8',dl:'#f0f8ff'});}},
+  {id:'bear',name:'小熊贴',rarity:'普通',art:()=>{
+    const[_b,_e,_n]=['b','e','n'];
+    return mkStickerSvg([[_b,0,0,0,0,0,0,_b,0,0,0,0],[_b,_b,0,0,0,0,_b,_b,0,0,0,0],[0,_b,_b,_b,_b,_b,_b,_b,0,0,0,0],[0,_b,_e,_b,_b,_b,_e,_b,0,0,0,0],[0,_b,_b,_b,_n,_b,_b,_b,0,0,0,0],[0,_b,_b,_b,_b,_b,_b,_b,0,0,0,0],[0,0,_b,_b,_b,_b,_b,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],{b:'#d4a060',e:'#3a3030',n:'#c08040'});}},
+  {id:'moon',name:'月亮贴',rarity:'稀有',art:()=>{
+    const _m='m';
+    return mkStickerSvg([[0,0,0,0,_m,_m,_m,0,0,0,0,0],[0,0,0,_m,_m,_m,0,0,0,0,0,0],[0,0,_m,_m,_m,0,0,0,0,0,0,0],[0,_m,_m,_m,0,0,0,0,0,0,0,0],[0,_m,_m,_m,0,0,0,0,0,0,0,0],[0,0,_m,_m,_m,0,0,0,0,0,0,0],[0,0,0,_m,_m,_m,0,0,0,0,0,0],[0,0,0,0,_m,_m,_m,0,0,0,0,0]],{m:'#ffd040'});}},
+  // ── 食物系列 ──
+  {id:'pizza',name:'披萨贴',rarity:'普通',art:()=>{
+    const[r,y,g,o]=['r','y','g','o'];
+    return mkStickerSvg([[0,0,0,0,y,0,0,0,0,0,0,0],[0,0,0,y,y,y,0,0,0,0,0,0],[0,0,y,y,r,y,y,0,0,0,0,0],[0,y,y,r,r,r,y,y,0,0,0,0],[y,y,y,o,r,r,y,y,y,0,0,0],[y,y,y,y,y,y,y,y,y,0,0,0],[0,y,y,y,y,y,y,y,0,0,0,0],[0,0,g,y,y,y,g,0,0,0,0,0]],{r:'#e04040',y:'#f0c840',g:'#40a040',o:'#e07030'});}},
+  {id:'cherry',name:'樱桃贴',rarity:'普通',art:()=>{
+    const[r,d,g,s]=['r','d','g','s'];
+    return mkStickerSvg([[0,0,0,g,0,g,0,0,0,0,0,0],[0,0,0,g,s,g,0,0,0,0,0,0],[0,0,0,0,s,0,s,0,0,0,0,0],[0,r,r,0,0,s,s,r,r,0,0,0],[r,r,r,r,0,0,r,r,r,r,0,0],[r,d,r,r,0,0,r,r,d,r,0,0],[r,r,r,r,0,0,r,r,r,r,0,0],[0,r,r,0,0,0,0,r,r,0,0,0]],{r:'#e03030',d:'#f07070',g:'#2a7a20',s:'#4ab030'});}},
+  {id:'pudding',name:'布丁贴',rarity:'稀有',art:()=>{
+    const[y,o,w,c]=['y','o','w','c'];
+    return mkStickerSvg([[0,0,0,c,c,c,0,0,0,0,0,0],[0,0,c,c,c,c,c,0,0,0,0,0],[0,0,o,o,o,o,o,0,0,0,0,0],[0,y,y,y,y,y,y,y,0,0,0,0],[y,y,w,y,y,y,w,y,y,0,0,0],[y,y,y,y,y,y,y,y,y,0,0,0],[y,y,y,y,y,y,y,y,y,0,0,0],[0,y,y,y,y,y,y,y,0,0,0,0]],{y:'#f5d060',o:'#c87020',w:'#f8f0c0',c:'#e05010'});}},
+  {id:'riceball',name:'饭团贴',rarity:'普通',art:()=>{
+    const[w,b,r,g]=['w','b','r','g'];
+    return mkStickerSvg([[0,0,0,w,w,w,w,0,0,0,0,0],[0,0,w,w,w,w,w,w,0,0,0,0],[0,w,w,w,w,w,w,w,w,0,0,0],[w,w,w,b,b,b,b,w,w,w,0,0],[w,w,b,b,b,b,b,b,w,w,0,0],[w,w,b,r,b,b,g,b,w,w,0,0],[0,w,w,w,w,w,w,w,w,0,0,0],[0,0,w,w,w,w,w,w,0,0,0,0]],{w:'#f0f0f0',b:'#3a3a3a',r:'#e04040',g:'#40a840'});}},
+  // ── 动物系列 ──
+  {id:'frog',name:'青蛙贴',rarity:'普通',art:()=>{
+    const[g,d,w,b,r]=['g','d','w','b','r'];
+    return mkStickerSvg([[g,g,0,0,0,0,g,g,0,0,0,0],[g,g,g,g,g,g,g,g,0,0,0,0],[g,g,w,g,g,g,w,g,0,0,0,0],[g,g,w,b,g,g,b,w,0,0,0,0],[g,g,g,g,g,g,g,g,0,0,0,0],[g,g,g,r,r,g,g,g,0,0,0,0],[0,g,g,g,g,g,g,0,0,0,0,0],[0,0,g,g,g,g,0,0,0,0,0,0]],{g:'#40b840',d:'#2a8020',w:'#f0f8e8',b:'#202020',r:'#e06060'});}},
+  {id:'penguin',name:'企鹅贴',rarity:'稀有',art:()=>{
+    const[b,w,o,y]=['b','w','o','y'];
+    return mkStickerSvg([[0,0,b,b,b,b,0,0,0,0,0,0],[0,b,b,w,w,b,b,0,0,0,0,0],[b,b,w,w,w,w,b,b,0,0,0,0],[b,b,w,o,o,w,b,b,0,0,0,0],[b,b,w,w,w,w,b,b,0,0,0,0],[0,b,b,b,b,b,b,0,0,0,0,0],[0,b,y,b,b,y,b,0,0,0,0,0],[0,0,y,y,y,y,0,0,0,0,0,0]],{b:'#2a2a3a',w:'#f0f0f0',o:'#f08020',y:'#f0a020'});}},
+  {id:'shiba',name:'柴犬贴',rarity:'普通',art:()=>{
+    const[t,w,b,p,n]=['t','w','b','p','n'];
+    return mkStickerSvg([[0,t,t,0,0,t,t,0,0,0,0,0],[t,t,t,t,t,t,t,t,0,0,0,0],[t,t,w,t,t,t,w,t,0,0,0,0],[t,t,w,b,t,b,w,t,0,0,0,0],[t,t,t,t,n,t,t,t,0,0,0,0],[0,t,p,t,t,t,p,0,0,0,0,0],[0,0,t,t,t,t,t,0,0,0,0,0],[0,0,0,t,t,t,0,0,0,0,0,0]],{t:'#d4883a',w:'#f0e0c0',b:'#2a1a0a',p:'#e09060',n:'#c06030'});}},
+  {id:'rabbit',name:'兔子贴',rarity:'稀有',art:()=>{
+    const[w,p,b,g]=['w','p','b','g'];
+    return mkStickerSvg([[w,0,0,0,0,0,w,0,0,0,0,0],[w,w,0,0,0,w,w,0,0,0,0,0],[0,w,w,w,w,w,0,0,0,0,0,0],[0,w,b,w,b,w,0,0,0,0,0,0],[0,w,w,p,w,w,0,0,0,0,0,0],[0,w,w,w,w,w,0,0,0,0,0,0],[0,0,w,g,w,0,0,0,0,0,0,0],[0,0,0,w,0,0,0,0,0,0,0,0]],{w:'#f8f0f0',p:'#f0b0b0',b:'#3a2a3a',g:'#f090a0'});}},
+  // ── 自然系列 ──
+  {id:'cactus',name:'仙人掌贴',rarity:'普通',art:()=>{
+    const[g,d,y]=['g','d','y'];
+    return mkStickerSvg([[0,0,0,g,g,g,0,0,0,0,0,0],[0,g,0,g,d,g,0,0,0,0,0,0],[0,g,g,g,d,g,0,g,0,0,0,0],[0,0,g,g,d,g,g,g,0,0,0,0],[0,0,g,g,d,g,g,0,0,0,0,0],[0,0,0,g,d,g,0,0,0,0,0,0],[0,0,y,g,d,g,y,0,0,0,0,0],[0,0,y,y,y,y,y,0,0,0,0,0]],{g:'#40a840',d:'#2a7020',y:'#c89040'});}},
+  {id:'sunflower',name:'向日葵贴',rarity:'稀有',art:()=>{
+    const[y,o,b,g]=['y','o','b','g'];
+    return mkStickerSvg([[0,0,y,0,y,0,y,0,0,0,0,0],[0,y,y,y,y,y,y,y,0,0,0,0],[y,y,y,b,b,b,y,y,y,0,0,0],[0,y,y,b,o,b,y,y,0,0,0,0],[y,y,y,b,b,b,y,y,y,0,0,0],[0,y,y,y,y,y,y,y,0,0,0,0],[0,0,y,0,g,0,y,0,0,0,0,0],[0,0,0,0,g,0,0,0,0,0,0,0]],{y:'#f5c820',o:'#c86010',b:'#7a4010',g:'#2a8020'});}},
+  {id:'butterfly',name:'蝴蝶贴',rarity:'超稀有',art:()=>{
+    const[p,l,y,b]=['p','l','y','b'];
+    return mkStickerSvg([[0,p,p,0,0,0,p,p,0,0,0,0],[p,p,l,p,0,p,l,p,p,0,0,0],[p,l,y,l,p,p,l,y,l,0,0,0],[p,p,l,p,b,p,l,p,p,0,0,0],[0,p,p,p,b,p,p,p,0,0,0,0],[0,0,p,p,b,p,p,0,0,0,0,0],[0,0,0,0,b,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],{p:'#d060d0',l:'#f0a0f0',y:'#ffd040',b:'#2a1a0a'});}},
+  {id:'clover',name:'四叶草贴',rarity:'稀有',art:()=>{
+    const[g,d,y]=['g','d','y'];
+    return mkStickerSvg([[0,0,g,g,0,g,g,0,0,0,0,0],[0,g,g,g,g,g,g,g,0,0,0,0],[g,g,g,d,g,d,g,g,g,0,0,0],[g,g,d,g,g,g,d,g,g,0,0,0],[0,g,g,g,g,g,g,g,0,0,0,0],[0,0,g,g,0,g,g,0,0,0,0,0],[0,0,0,y,y,y,0,0,0,0,0,0],[0,0,0,0,y,0,0,0,0,0,0,0]],{g:'#40b840',d:'#2a8020',y:'#a06020'});}},
+  // ── 趣味系列 ──
+  {id:'gameboy',name:'游戏机贴',rarity:'稀有',art:()=>{
+    const[b,r,g,y,w]=['b','r','g','y','w'];
+    return mkStickerSvg([[0,b,b,b,b,b,b,b,b,0,0,0],[b,b,b,b,b,b,b,b,b,b,0,0],[b,b,w,b,b,b,b,r,b,b,0,0],[b,w,w,w,b,b,r,r,r,b,0,0],[b,b,w,b,b,g,b,r,b,b,0,0],[b,b,b,b,g,g,g,b,b,b,0,0],[b,b,b,b,b,g,b,y,b,b,0,0],[0,b,b,b,b,b,b,b,b,0,0,0]],{b:'#303050',r:'#e04040',g:'#40b040',y:'#f0c040',w:'#f0f0f0'});}},
+  {id:'heart',name:'爱心贴',rarity:'普通',art:()=>{
+    const[r,p]=['r','p'];
+    return mkStickerSvg([[0,r,r,0,0,r,r,0,0,0,0,0],[r,r,r,r,r,r,r,r,0,0,0,0],[r,r,p,r,r,r,p,r,0,0,0,0],[r,r,r,r,r,r,r,r,0,0,0,0],[0,r,r,r,r,r,r,0,0,0,0,0],[0,0,r,r,r,r,0,0,0,0,0,0],[0,0,0,r,r,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0]],{r:'#e03060',p:'#f87090'});}},
+  {id:'lightning',name:'闪电贴',rarity:'超稀有',art:()=>{
+    const[y,o]=['y','o'];
+    return mkStickerSvg([[0,0,0,y,y,y,0,0,0,0,0,0],[0,0,y,y,y,0,0,0,0,0,0,0],[0,y,y,y,0,0,0,0,0,0,0,0],[y,y,y,y,y,y,y,0,0,0,0,0],[0,0,0,o,y,y,y,0,0,0,0,0],[0,0,0,0,o,y,y,0,0,0,0,0],[0,0,0,0,0,o,y,0,0,0,0,0],[0,0,0,0,0,0,o,0,0,0,0,0]],{y:'#ffd020',o:'#f09000'});}},
+  {id:'film',name:'胶卷贴',rarity:'稀有',art:()=>{
+    const[b,w,g,y]=['b','w','g','y'];
+    return mkStickerSvg([[b,b,b,b,b,b,b,b,b,b,0,0],[b,w,b,w,b,w,b,w,b,b,0,0],[b,b,g,g,g,g,g,b,b,b,0,0],[b,b,g,y,y,y,g,b,b,b,0,0],[b,b,g,y,y,y,g,b,b,b,0,0],[b,b,g,g,g,g,g,b,b,b,0,0],[b,w,b,w,b,w,b,w,b,b,0,0],[b,b,b,b,b,b,b,b,b,b,0,0]],{b:'#2a2a2a',w:'#f0f0f0',g:'#4a4a4a',y:'#f0d060'});}},
+  // ── 16x16 新款 ──
+  {id:'cupcake',name:'纸杯蛋糕',rarity:'普通',art:()=>{
+    const[p,c,w,y,r]=['p','c','w','y','r'];
+    return mkStickerSvg([[0,0,0,0,0,0,r,r,0,0,0,0,0,0,0,0],[0,0,0,0,0,r,r,r,r,0,0,0,0,0,0,0],[0,0,0,0,0,0,r,r,0,0,0,0,0,0,0,0],[0,0,0,0,p,p,p,p,p,p,p,0,0,0,0,0],[0,0,0,p,p,w,p,p,w,p,p,p,0,0,0,0],[0,0,0,p,p,p,p,p,p,p,p,p,0,0,0,0],[0,0,0,0,p,p,p,p,p,p,p,0,0,0,0,0],[0,0,0,0,0,p,p,p,p,p,0,0,0,0,0,0],[0,0,0,0,c,c,c,c,c,c,c,0,0,0,0,0],[0,0,0,c,c,y,c,c,y,c,c,c,0,0,0,0],[0,0,0,c,c,c,c,c,c,c,c,c,0,0,0,0],[0,0,0,c,c,c,c,c,c,c,c,c,0,0,0,0],[0,0,0,0,c,c,c,c,c,c,c,0,0,0,0,0],[0,0,0,0,0,c,c,c,c,c,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{p:'#f0a0c0',c:'#c87820',w:'#f8e8f0',y:'#f0d060',r:'#e03060'});}},
+  {id:'ramen',name:'拉面贴',rarity:'普通',art:()=>{
+    const[b,w,y,r,g,o]=['b','w','y','r','g','o'];
+    return mkStickerSvg([[0,0,b,b,b,b,b,b,b,b,b,0,0,0,0,0],[0,b,b,b,b,b,b,b,b,b,b,b,0,0,0,0],[b,b,w,w,w,w,w,w,w,w,w,b,b,0,0,0],[b,w,w,y,y,y,y,y,y,y,w,w,b,0,0,0],[b,w,y,y,r,y,y,g,y,y,y,w,b,0,0,0],[b,w,y,y,y,y,y,y,y,y,y,w,b,0,0,0],[b,w,w,y,y,y,y,y,y,y,w,w,b,0,0,0],[b,b,w,w,w,w,w,w,w,w,w,b,b,0,0,0],[0,b,b,o,o,o,o,o,o,o,b,b,0,0,0,0],[0,0,b,b,o,o,o,o,o,b,b,0,0,0,0,0],[0,0,0,b,b,b,b,b,b,b,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{b:'#8a5a30',w:'#f8e8c0',y:'#f0c840',r:'#e04040',g:'#40a840',o:'#c87820'});}},
+  {id:'panda',name:'熊猫贴',rarity:'稀有',art:()=>{
+    const[w,b,p,e,n]=['w','b','p','e','n'];
+    return mkStickerSvg([[0,0,b,b,b,0,0,0,b,b,b,0,0,0,0,0],[0,b,b,b,b,b,0,b,b,b,b,b,0,0,0,0],[b,b,b,w,w,b,b,b,w,w,b,b,b,0,0,0],[b,b,w,w,w,w,w,w,w,w,w,b,b,0,0,0],[b,w,w,b,w,w,w,w,w,b,w,w,b,0,0,0],[b,w,w,e,w,w,w,w,w,e,w,w,b,0,0,0],[b,w,w,w,w,p,p,w,w,w,w,w,b,0,0,0],[b,w,w,w,p,n,n,p,w,w,w,w,b,0,0,0],[b,w,w,w,w,p,p,w,w,w,w,w,b,0,0,0],[0,b,w,w,w,w,w,w,w,w,w,b,0,0,0,0],[0,0,b,b,w,w,w,w,w,b,b,0,0,0,0,0],[0,0,0,b,b,b,b,b,b,b,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{w:'#f0f0f0',b:'#2a2a2a',p:'#f0c0a0',e:'#4a4a4a',n:'#c08060'});}},
+  {id:'snowflake',name:'雪花贴',rarity:'稀有',art:()=>{
+    const[b,l]=['b','l'];
+    return mkStickerSvg([[0,0,0,0,0,0,b,b,0,0,0,0,0,0,0,0],[0,0,0,0,0,b,l,b,0,0,0,0,0,0,0,0],[0,0,b,0,0,b,b,b,0,b,0,0,0,0,0,0],[0,0,0,b,b,b,b,b,b,b,0,0,0,0,0,0],[b,b,b,b,b,b,b,b,b,b,b,b,0,0,0,0],[b,b,b,b,b,l,l,b,b,b,b,b,0,0,0,0],[b,b,b,b,l,l,l,l,b,b,b,b,0,0,0,0],[b,b,b,b,b,l,l,b,b,b,b,b,0,0,0,0],[b,b,b,b,b,b,b,b,b,b,b,b,0,0,0,0],[0,0,0,b,b,b,b,b,b,b,0,0,0,0,0,0],[0,0,b,0,0,b,b,b,0,b,0,0,0,0,0,0],[0,0,0,0,0,b,l,b,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,b,b,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{b:'#80c8f0',l:'#d0f0ff'});}},
+  {id:'camera',name:'相机贴',rarity:'稀有',art:()=>{
+    const[b,w,r,l,y]=['b','w','r','l','y'];
+    return mkStickerSvg([[0,b,b,b,r,r,r,b,b,b,b,b,0,0,0,0],[b,b,b,b,b,b,b,b,b,b,b,b,b,0,0,0],[b,b,b,b,b,b,b,b,b,b,b,b,b,0,0,0],[b,b,b,b,l,l,l,l,l,b,b,b,b,0,0,0],[b,b,b,l,l,l,l,l,l,l,b,b,b,0,0,0],[b,b,b,l,l,w,l,l,l,l,b,b,b,0,0,0],[b,b,b,l,w,w,w,l,l,l,b,b,b,0,0,0],[b,b,b,l,l,w,l,l,l,l,b,b,b,0,0,0],[b,b,b,b,l,l,l,l,l,b,b,b,b,0,0,0],[b,b,b,b,b,b,b,b,b,b,b,b,b,0,0,0],[b,b,b,b,b,b,b,b,b,b,b,y,b,0,0,0],[0,b,b,b,b,b,b,b,b,b,b,b,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{b:'#2a2a3a',w:'#f0f8ff',r:'#e03030',l:'#a0c8e8',y:'#f0d040'});}},
+  {id:'balloon',name:'气球贴',rarity:'普通',art:()=>{
+    const[r,p,w,s,t]=['r','p','w','s','t'];
+    return mkStickerSvg([[0,0,0,r,r,r,r,r,r,0,0,0,0,0,0,0],[0,0,r,r,r,r,r,r,r,r,0,0,0,0,0,0],[0,r,r,p,p,r,r,r,r,r,r,0,0,0,0,0],[0,r,r,p,w,r,r,r,r,r,r,0,0,0,0,0],[0,r,r,r,r,r,r,r,r,r,r,0,0,0,0,0],[0,r,r,r,r,r,r,r,r,r,r,0,0,0,0,0],[0,0,r,r,r,r,r,r,r,r,0,0,0,0,0,0],[0,0,0,r,r,r,r,r,r,0,0,0,0,0,0,0],[0,0,0,0,r,r,r,r,0,0,0,0,0,0,0,0],[0,0,0,0,0,s,s,0,0,0,0,0,0,0,0,0],[0,0,0,0,s,t,t,s,0,0,0,0,0,0,0,0],[0,0,0,0,0,t,t,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,t,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{r:'#f03060',p:'#f890a8',w:'#f8f8ff',s:'#c01040',t:'#8a3060'});}},
+  {id:'trophy',name:'奖杯贴',rarity:'超稀有',art:()=>{
+    const[y,o,w,g,l]=['y','o','w','g','l'];
+    return mkStickerSvg([[0,0,y,y,y,y,y,y,y,y,0,0,0,0,0,0],[0,y,y,y,y,y,y,y,y,y,y,0,0,0,0,0],[y,y,y,w,y,y,y,y,w,y,y,y,0,0,0,0],[y,y,y,y,y,y,y,y,y,y,y,y,0,0,0,0],[0,y,y,y,y,y,y,y,y,y,y,0,0,0,0,0],[0,0,y,y,y,y,y,y,y,y,0,0,0,0,0,0],[0,0,0,y,o,y,y,o,y,0,0,0,0,0,0,0],[0,0,0,0,y,o,o,y,0,0,0,0,0,0,0,0],[0,0,0,0,0,y,y,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,y,y,0,0,0,0,0,0,0,0,0],[0,0,g,g,g,g,g,g,g,g,0,0,0,0,0,0],[0,0,g,g,l,g,g,l,g,g,0,0,0,0,0,0],[0,0,g,g,g,g,g,g,g,g,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],{y:'#f0c820',o:'#c89000',w:'#f8f0a0',g:'#a06820',l:'#c08828'});}},
+];
+
+const RARITY_WEIGHT={'普通':60,'稀有':30,'超稀有':10};
+
+function mkStickerSvg(grid,pal,sz=2){
+  const h=grid.length,w=grid[0].length;
+  let r='';
+  grid.forEach((row,y)=>row.forEach((c,x)=>{if(c&&pal[c])r+=`<rect x="${x*sz}" y="${y*sz}" width="${sz}" height="${sz}" fill="${pal[c]}"/>` }));
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w*sz}" height="${h*sz}" viewBox="0 0 ${w*sz} ${h*sz}" style="image-rendering:pixelated">${r}</svg>`;
+}
+
+
+function giveSticker(){
+  const roll=Math.random()*100;
+  let pool=[];
+  let acc=0;
+  for(const def of STICKER_DEFS){
+    acc+=RARITY_WEIGHT[def.rarity]||0;
+    pool.push({def,w:acc});
+  }
+  const pick=pool.find(p=>roll<p.w)||pool[pool.length-1];
+  const def=pick.def;
+  const stickers=loadStickers();
+  const existing=stickers.find(s=>s.id===def.id);
+  if(existing) existing.count=(existing.count||1)+1;
+  else stickers.push({id:def.id,count:1,onFridge:false});
+  saveStickers(stickers);
+  return def;
+}
+
+function showStickerReward(def){
+  document.getElementById('sticker-reward-art').innerHTML=def.art();
+  document.getElementById('sticker-reward-name').textContent=`${def.name} · ${def.rarity}`;
+  document.getElementById('sticker-reward').style.display='flex';
+}
+function closeStickerReward(){
+  document.getElementById('sticker-reward').style.display='none';
+  renderStickerGrid();
+  renderFridgeStickers();
+}
+
+function renderStickerGrid(){
+  const stickers=loadStickers();
+  const el=document.getElementById('sticker-grid');if(!el)return;
+  if(!stickers.length){
+    el.innerHTML='<div class="sticker-empty">还没有冰箱贴<br>生成票根来获得！</div>';return;
+  }
+  const hint=`<div class="sticker-hint" style="width:100%">长按拖动 → 放到冰箱外壳上</div>`;
+  el.innerHTML=hint+stickers.map(s=>{
+    const def=STICKER_DEFS.find(d=>d.id===s.id);if(!def)return'';
+    const placed=s.x!=null;
+    return `<div class="sticker-item${placed?' placed':''}" 
+      id="si-${s.id}"
+      data-id="${s.id}"
+      style="${placed?'outline:2px solid var(--accent);outline-offset:2px':''}">
+      ${def.art()}
+      <div class="sticker-item-name">${def.name}${placed?' ✓':''}</div>
+      ${s.count>1?`<div class="sticker-item-cnt">×${s.count}</div>`:''}
+    </div>`;
+  }).join('');
+  // bind drag events
+  el.querySelectorAll('.sticker-item').forEach(item=>{
+    item.addEventListener('touchstart', onStickerTouchStart, {passive:false});
+  });
+}
+
+/* ── DRAG STICKER ── */
+let _ds={id:null,ghost:null,src:null};
+
+function onStickerTouchStart(e){
+  e.preventDefault();
+  const id=this.dataset.id;
+  const def=STICKER_DEFS.find(d=>d.id===id);if(!def)return;
+  _ds.id=id;_ds.src=this;
+  this.classList.add('dragging');
+  // create ghost
+  const g=document.createElement('div');
+  g.className='sticker-drag-ghost';
+  g.innerHTML=def.art();
+  g.style.transform='scale(1.4)';
+  document.body.appendChild(g);
+  _ds.ghost=g;
+  moveStickerGhost(e.touches[0]);
+  document.addEventListener('touchmove',onStickerTouchMove,{passive:false});
+  document.addEventListener('touchend',onStickerTouchEnd);
+}
+
+function moveStickerGhost(t){
+  if(!_ds.ghost)return;
+  _ds.ghost.style.left=(t.clientX-18)+'px';
+  _ds.ghost.style.top=(t.clientY-18)+'px';
+}
+
+function onStickerTouchMove(e){e.preventDefault();moveStickerGhost(e.touches[0]);}
+
+function onStickerTouchEnd(e){
+  document.removeEventListener('touchmove',onStickerTouchMove);
+  document.removeEventListener('touchend',onStickerTouchEnd);
+  if(_ds.src) _ds.src.classList.remove('dragging');
+  if(_ds.ghost){_ds.ghost.remove();_ds.ghost=null;}
+  const t=e.changedTouches[0];
+  const fridge=document.getElementById('fridge-outer');
+  if(!fridge||!_ds.id){_ds={id:null,ghost:null,src:null};return;}
+  const rect=fridge.getBoundingClientRect();
+  if(t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom){
+    const x=Math.round(t.clientX-rect.left);
+    const y=Math.round(t.clientY-rect.top);
+    const stickers=loadStickers();
+    const s=stickers.find(s=>s.id===_ds.id);
+    if(s){s.x=x;s.y=y;}
+    saveStickers(stickers);
+    renderFridgeStickers();
+    renderStickerGrid();
+  }
+  _ds={id:null,ghost:null,src:null};
+}
+
+function removeStickerFromFridge(id){
+  const stickers=loadStickers();
+  const s=stickers.find(s=>s.id===id);
+  if(s){delete s.x;delete s.y;}
+  saveStickers(stickers);
+  renderFridgeStickers();
+  renderStickerGrid();
+}
+
+function renderFridgeStickers(){
+  document.querySelectorAll('.sticker-on-fridge').forEach(e=>e.remove());
+  const stickers=loadStickers().filter(s=>s.x!=null);
+  const fridge=document.getElementById('fridge-outer');if(!fridge)return;
+  const anyOpen=doorState.top||doorState.btm;
+  stickers.forEach(s=>{
+    const def=STICKER_DEFS.find(d=>d.id===s.id);if(!def)return;
+    const el=document.createElement('div');
+    el.className='sticker-on-fridge';
+    el.innerHTML=def.art();
+    el.style.left=(s.x-18)+'px';
+    el.style.top=(s.y-18)+'px';
+    el.style.display=anyOpen?'none':'block';
+    el.dataset.id=s.id;
+    // drag to reposition
+    el.addEventListener('touchstart',onPlacedStickerTouchStart,{passive:false});
+    fridge.appendChild(el);
+  });
+}
+
+/* drag already-placed stickers */
+let _ps={id:null,ghost:null,el:null};
+
+function onPlacedStickerTouchStart(e){
+  e.preventDefault();e.stopPropagation();
+  const id=this.dataset.id;
+  const def=STICKER_DEFS.find(d=>d.id===id);if(!def)return;
+  _ps.id=id;_ps.el=this;
+  this.style.opacity='0.3';
+  const g=document.createElement('div');
+  g.className='sticker-drag-ghost';
+  g.innerHTML=def.art();
+  g.style.transform='scale(1.4)';
+  document.body.appendChild(g);
+  _ps.ghost=g;
+  movePlacedGhost(e.touches[0]);
+  document.addEventListener('touchmove',onPlacedStickerMove,{passive:false});
+  document.addEventListener('touchend',onPlacedStickerEnd);
+}
+
+function movePlacedGhost(t){
+  if(!_ps.ghost)return;
+  _ps.ghost.style.left=(t.clientX-18)+'px';
+  _ps.ghost.style.top=(t.clientY-18)+'px';
+}
+
+function onPlacedStickerMove(e){e.preventDefault();movePlacedGhost(e.touches[0]);}
+
+function onPlacedStickerEnd(e){
+  document.removeEventListener('touchmove',onPlacedStickerMove);
+  document.removeEventListener('touchend',onPlacedStickerEnd);
+  if(_ps.ghost){_ps.ghost.remove();_ps.ghost=null;}
+  const t=e.changedTouches[0];
+  const fridge=document.getElementById('fridge-outer');
+  if(!fridge||!_ps.id){if(_ps.el)_ps.el.style.opacity='1';_ps={id:null,ghost:null,el:null};return;}
+  const rect=fridge.getBoundingClientRect();
+  const stickers=loadStickers();
+  const s=stickers.find(s=>s.id===_ps.id);
+  if(s){
+    if(t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom){
+      // move to new position
+      s.x=Math.round(t.clientX-rect.left);
+      s.y=Math.round(t.clientY-rect.top);
+    }
+    // if dragged outside fridge, remove from fridge
+    else{delete s.x;delete s.y;}
+  }
+  saveStickers(stickers);
+  renderFridgeStickers();
+  renderStickerGrid();
+  _ps={id:null,ghost:null,el:null};
 }
 
 /* ── SCENE SWITCH ── */
@@ -1041,8 +1448,11 @@ function renderCookLog(){
       <div class="cook-card-name">${l.name}</div>
       ${l.note?`<hr class="cook-card-divider"><div class="cook-card-note">${l.note}</div>`:''}
       <div class="cook-card-footer">
-        <button class="receipt-btn" onclick="showReceipt('${l.id}')">🧾 生成票根</button>
-        <button class="cook-card-del" onclick="delCookLog('${l.id}')">删除</button>
+        ${l.locked
+          ? `<span style="font-size:8px;color:var(--accent);letter-spacing:1px">🎀 已生成票根</span>`
+          : `<button class="receipt-btn" onclick="showReceipt('${l.id}')">🧾 生成票根</button>`
+        }
+        ${l.locked ? '' : `<button class="cook-card-del" onclick="delCookLog('${l.id}')">删除</button>`}
       </div>
     </div>`).join('');
 }
@@ -1053,14 +1463,28 @@ function closeReceipt(){document.getElementById('receipt-modal').style.display='
 async function showReceipt(id){
   const log=loadCookLog().find(l=>l.id===id);
   if(!log)return;
+  // warn user
+  document.getElementById('receipt-warn-modal').style.display='flex';
+  document.getElementById('receipt-warn-modal').dataset.id=id;
+}
+async function confirmReceipt(){
+  const id=document.getElementById('receipt-warn-modal').dataset.id;
+  document.getElementById('receipt-warn-modal').style.display='none';
+  const logs=loadCookLog();
+  const log=logs.find(l=>l.id===id);
+  if(!log)return;
   const btn=document.querySelector(`[onclick="showReceipt('${id}')"]`);
   if(btn){btn.textContent='生成中...';btn.disabled=true;}
   const dataUrl=await drawReceipt(log);
   const a=document.createElement('a');
-  a.href=dataUrl;
-  a.download=`fridge-${log.name}-${log.date}.png`;
-  a.click();
-  if(btn){btn.textContent='🧾 生成票根';btn.disabled=false;}
+  a.href=dataUrl;a.download=`fridge-${log.name}-${log.date}.png`;a.click();
+  // lock entry
+  log.locked=true;
+  saveCookLog(logs);
+  // give sticker reward
+  const sticker=giveSticker();
+  setTimeout(()=>showStickerReward(sticker),800);
+  renderCookLog();
 }
 function closeReceipt(){document.getElementById('receipt-modal')?.remove();}
 
@@ -1226,16 +1650,9 @@ function wrapText(text,maxW,fontSize){
 
 /* ── INIT ── */
 document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
-buildSwatches();renderList();renderShelves();renderTemplates();
+buildSwatches();renderList();renderShelves();renderTemplates();renderStickerGrid();renderFridgeStickers();
 document.getElementById('d-date').value=new Date().toISOString().split('T')[0];
 document.getElementById('edit-modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmEditQty();});
-</script>
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>{
-    navigator.serviceWorker.register('/sw.js').catch(()=>{});
-  });
-}
 </script>
 <script>
 if('serviceWorker' in navigator){
